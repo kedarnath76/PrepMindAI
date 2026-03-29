@@ -1,0 +1,1969 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PrepMind AI — Made for Pooja</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700;900&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #06060a;
+  --bg2: #0d0d14;
+  --bg3: #12121c;
+  --surface: #161620;
+  --surface2: #1e1e2e;
+  --border: #2a2a3e;
+  --accent: #f8c8dc;
+  --accent2: #e8a0c0;
+  --accent3: #ff6b9d;
+  --gold: #f5c842;
+  --gold2: #e8b800;
+  --green: #4ade80;
+  --red: #f87171;
+  --blue: #60a5fa;
+  --text: #f0eef8;
+  --text2: #a8a0c0;
+  --text3: #6b6485;
+  --glow: 0 0 30px rgba(248,200,220,0.15);
+  --glow2: 0 0 60px rgba(248,200,220,0.08);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:'DM Sans',sans-serif;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:var(--bg)}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+::-webkit-scrollbar-thumb:hover{background:var(--accent)}
+
+/* NOISE OVERLAY */
+body::before{
+  content:'';
+  position:fixed;inset:0;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events:none;z-index:9999;opacity:.4;
+}
+
+/* ===== LOADER ===== */
+#loader{
+  position:fixed;inset:0;background:var(--bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  z-index:1000;transition:opacity .8s,visibility .8s;
+}
+#loader.hidden{opacity:0;visibility:hidden}
+.loader-logo{
+  font-family:'Cinzel',serif;
+  font-size:2.8rem;font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  letter-spacing:.05em;margin-bottom:.3rem;
+}
+.loader-sub{
+  font-size:.8rem;color:var(--text3);letter-spacing:.3em;
+  text-transform:uppercase;margin-bottom:3rem;font-weight:500;
+}
+.loader-steps{display:flex;flex-direction:column;gap:.7rem;width:320px}
+.loader-step{
+  display:flex;align-items:center;gap:.8rem;
+  font-size:.85rem;color:var(--text3);opacity:0;
+  transform:translateX(-12px);transition:all .4s;
+}
+.loader-step.active{opacity:1;transform:translateX(0);color:var(--text2)}
+.loader-step.done{opacity:1;transform:translateX(0);color:var(--accent)}
+.step-dot{
+  width:8px;height:8px;border-radius:50%;
+  background:var(--border);flex-shrink:0;transition:all .3s;
+}
+.loader-step.active .step-dot{background:var(--accent);box-shadow:0 0 8px var(--accent)}
+.loader-step.done .step-dot{background:var(--green)}
+.loader-bar-wrap{
+  width:320px;height:2px;background:var(--border);
+  border-radius:2px;margin-top:2rem;overflow:hidden;
+}
+.loader-bar{
+  height:100%;width:0;
+  background:linear-gradient(90deg,var(--accent),var(--gold));
+  border-radius:2px;transition:width .4s ease;
+}
+
+/* ===== HEADER ===== */
+#app{display:none}
+header{
+  position:sticky;top:0;z-index:100;
+  background:rgba(6,6,10,.9);
+  backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--border);
+  padding:.8rem 1.5rem;
+  display:flex;align-items:center;justify-content:space-between;
+  gap:1rem;
+}
+.logo{
+  font-family:'Cinzel',serif;font-weight:700;font-size:1.1rem;
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  white-space:nowrap;
+}
+.logo span{font-weight:400;font-size:.75rem;display:block;
+  background:none;-webkit-text-fill-color:var(--text3);letter-spacing:.2em}
+.header-stats{
+  display:flex;gap:1rem;align-items:center;flex-wrap:wrap;
+}
+.stat-chip{
+  display:flex;align-items:center;gap:.4rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:.3rem .8rem;font-size:.78rem;
+  color:var(--text2);
+}
+.stat-chip .val{color:var(--accent);font-weight:600;font-family:'JetBrains Mono',monospace}
+.stat-chip .ico{font-size:.9rem}
+.streak-chip{border-color:rgba(245,200,66,.3);color:var(--gold)}
+.streak-chip .val{color:var(--gold)}
+.xp-chip{border-color:rgba(248,200,220,.3)}
+
+/* ===== TABS ===== */
+nav.tabs{
+  display:flex;gap:0;
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  overflow-x:auto;scrollbar-width:none;
+}
+nav.tabs::-webkit-scrollbar{display:none}
+.tab-btn{
+  padding:.8rem 1.3rem;font-size:.82rem;font-weight:500;
+  color:var(--text3);background:none;border:none;cursor:pointer;
+  white-space:nowrap;position:relative;transition:color .2s;
+  font-family:'DM Sans',sans-serif;
+  border-bottom:2px solid transparent;
+}
+.tab-btn:hover{color:var(--text2)}
+.tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tab-btn .t-ico{font-size:1rem;margin-right:.4rem}
+
+/* ===== MAIN CONTENT ===== */
+main{max-width:1100px;margin:0 auto;padding:1.5rem;min-height:calc(100vh - 120px)}
+.tab-panel{display:none;animation:fadeUp .3s ease}
+.tab-panel.active{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ===== CARDS & GRID ===== */
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem}
+@media(max-width:700px){.grid2,.grid3{grid-template-columns:1fr}}
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1.2rem;
+  transition:border-color .2s,box-shadow .2s;
+}
+.card:hover{border-color:rgba(248,200,220,.3);box-shadow:var(--glow)}
+.card-title{
+  font-family:'Cinzel',serif;font-size:.85rem;font-weight:600;
+  color:var(--accent);letter-spacing:.08em;text-transform:uppercase;
+  margin-bottom:.8rem;display:flex;align-items:center;gap:.5rem;
+}
+.section-title{
+  font-family:'Cinzel',serif;font-size:1.3rem;font-weight:700;
+  color:var(--text);margin-bottom:1.2rem;letter-spacing:.03em;
+}
+.section-sub{font-size:.85rem;color:var(--text3);margin-bottom:1.5rem;line-height:1.6}
+
+/* ===== BADGE / TAG ===== */
+.badge{
+  display:inline-flex;align-items:center;gap:.3rem;
+  padding:.2rem .6rem;border-radius:20px;font-size:.72rem;font-weight:600;
+  text-transform:uppercase;letter-spacing:.06em;
+}
+.badge-high{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.badge-med{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.3)}
+.badge-low{background:rgba(96,165,250,.12);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+.badge-easy{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.badge-hard{background:rgba(248,113,113,.15);color:var(--red);border:1px solid rgba(248,113,113,.3)}
+.badge-ranker{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.3)}
+
+/* ===== BUTTONS ===== */
+.btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.65rem 1.4rem;border-radius:8px;font-size:.85rem;
+  font-weight:600;cursor:pointer;transition:all .2s;border:none;
+  font-family:'DM Sans',sans-serif;
+}
+.btn-primary{
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  color:#06060a;
+}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(248,200,220,.3)}
+.btn-secondary{
+  background:var(--surface2);color:var(--text2);
+  border:1px solid var(--border);
+}
+.btn-secondary:hover{border-color:var(--accent);color:var(--accent)}
+.btn-gold{
+  background:linear-gradient(135deg,var(--gold),var(--gold2));
+  color:#06060a;
+}
+.btn-gold:hover{transform:translateY(-1px);box-shadow:0 4px 20px rgba(245,200,66,.3)}
+.btn-sm{padding:.4rem .9rem;font-size:.78rem}
+.btn-icon{padding:.6rem;border-radius:8px}
+
+/* ===== PROGRESS BAR ===== */
+.prog-wrap{background:var(--border);border-radius:4px;height:6px;overflow:hidden}
+.prog-fill{height:100%;border-radius:4px;transition:width .6s ease}
+.prog-accent{background:linear-gradient(90deg,var(--accent),var(--accent3))}
+.prog-gold{background:linear-gradient(90deg,var(--gold),var(--gold2))}
+.prog-green{background:linear-gradient(90deg,#4ade80,#22c55e)}
+
+/* ===== INPUT / SELECT ===== */
+select,input,textarea{
+  background:var(--surface);border:1px solid var(--border);
+  color:var(--text);border-radius:8px;padding:.6rem .9rem;
+  font-family:'DM Sans',sans-serif;font-size:.85rem;
+  outline:none;transition:border-color .2s;width:100%;
+}
+select:focus,input:focus,textarea:focus{border-color:var(--accent)}
+select option{background:var(--surface)}
+textarea{resize:vertical;min-height:80px}
+
+/* ===== OVERVIEW TAB ===== */
+.overview-hero{
+  background:linear-gradient(135deg,rgba(248,200,220,.06),rgba(245,200,66,.04));
+  border:1px solid rgba(248,200,220,.2);border-radius:16px;
+  padding:2rem;margin-bottom:1.5rem;text-align:center;
+  position:relative;overflow:hidden;
+}
+.overview-hero::before{
+  content:'';position:absolute;top:-50%;left:-50%;
+  width:200%;height:200%;
+  background:radial-gradient(ellipse at center,rgba(248,200,220,.04) 0%,transparent 60%);
+  animation:pulse 4s ease-in-out infinite;
+}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.05)}}
+.air-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:linear-gradient(135deg,rgba(245,200,66,.15),rgba(248,200,220,.1));
+  border:1px solid rgba(245,200,66,.4);
+  border-radius:30px;padding:.5rem 1.2rem;
+  font-family:'Cinzel',serif;font-size:.8rem;font-weight:700;
+  color:var(--gold);letter-spacing:.1em;margin-bottom:1rem;
+}
+.overview-hero h1{
+  font-family:'Cinzel',serif;font-size:1.8rem;font-weight:900;
+  background:linear-gradient(135deg,var(--text),var(--accent));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+  margin-bottom:.5rem;
+}
+.overview-hero p{color:var(--text2);font-size:.9rem;line-height:1.6;max-width:500px;margin:0 auto}
+
+.subject-card{
+  border-radius:12px;padding:1.2rem;
+  background:var(--surface);border:1px solid var(--border);
+  transition:all .25s;
+}
+.subject-card:hover{transform:translateY(-2px);box-shadow:var(--glow)}
+.subj-icon{font-size:2rem;margin-bottom:.5rem}
+.subj-name{font-family:'Cinzel',serif;font-size:.9rem;font-weight:700;margin-bottom:.3rem}
+.subj-marks{font-size:.78rem;color:var(--text3)}
+.subj-marks b{color:var(--gold);font-size:1rem}
+
+.chapter-row{
+  display:flex;align-items:center;gap.8rem;
+  padding:.8rem 0;border-bottom:1px solid rgba(42,42,62,.5);
+}
+.chapter-row:last-child{border-bottom:none}
+.ch-name{flex:1;font-size:.85rem;color:var(--text2)}
+.ch-pyq{font-size:.78rem;color:var(--text3);font-family:'JetBrains Mono',monospace}
+.ch-bars{width:80px}
+
+.topper-tip{
+  display:flex;gap:.8rem;padding:.9rem;
+  background:rgba(248,200,220,.04);border-left:3px solid var(--accent);
+  border-radius:0 8px 8px 0;margin-bottom:.6rem;
+  font-size:.84rem;color:var(--text2);line-height:1.5;
+}
+.tip-ico{font-size:1.1rem;flex-shrink:0}
+
+/* ===== PRACTICE TAB ===== */
+.q-filters{
+  display:flex;gap:.8rem;flex-wrap:wrap;
+  margin-bottom:1.2rem;align-items:center;
+}
+.q-filters select{width:auto;flex:1;min-width:130px}
+.q-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:1.5rem;margin-bottom:1rem;
+  transition:border-color .2s;
+}
+.q-meta{display:flex;gap:.6rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center}
+.q-num{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  color:var(--text3);
+}
+.q-timer{
+  margin-left:auto;font-family:'JetBrains Mono',monospace;
+  font-size:1rem;color:var(--accent);font-weight:600;
+  background:rgba(248,200,220,.08);padding:.2rem .7rem;border-radius:6px;
+}
+.q-timer.warn{color:var(--red);background:rgba(248,113,113,.1)}
+.q-text{font-size:.95rem;line-height:1.7;margin-bottom:1.2rem;color:var(--text)}
+.options{display:flex;flex-direction:column;gap:.6rem}
+.opt{
+  display:flex;align-items:flex-start;gap:.8rem;
+  padding:.85rem 1rem;background:var(--surface2);
+  border:1.5px solid var(--border);border-radius:10px;
+  cursor:pointer;transition:all .2s;font-size:.88rem;color:var(--text2);
+}
+.opt:hover:not(.disabled){border-color:rgba(248,200,220,.4);color:var(--text)}
+.opt.correct{border-color:var(--green);background:rgba(74,222,128,.08);color:var(--green)}
+.opt.wrong{border-color:var(--red);background:rgba(248,113,113,.08);color:var(--red)}
+.opt.selected-wrong{border-color:var(--red);background:rgba(248,113,113,.08)}
+.opt-label{
+  width:24px;height:24px;border-radius:50%;
+  background:var(--border);display:flex;align-items:center;justify-content:center;
+  font-size:.75rem;font-weight:700;flex-shrink:0;color:var(--text3);
+  transition:all .2s;font-family:'JetBrains Mono',monospace;
+}
+.opt.correct .opt-label{background:var(--green);color:#000}
+.opt.wrong .opt-label,.opt.selected-wrong .opt-label{background:var(--red);color:#000}
+
+.explanation-box{
+  margin-top:1.2rem;border-top:1px solid var(--border);padding-top:1.2rem;
+  display:none;
+}
+.explanation-box.show{display:block}
+.exp-section{margin-bottom:.8rem}
+.exp-label{
+  font-size:.72rem;font-weight:600;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.3rem;
+}
+.exp-text{font-size:.85rem;color:var(--text2);line-height:1.6}
+.trick-box{
+  background:rgba(245,200,66,.06);border:1px solid rgba(245,200,66,.2);
+  border-radius:8px;padding:.7rem;margin:.5rem 0;
+  font-size:.83rem;color:var(--gold);
+}
+.trap-box{
+  background:rgba(248,113,113,.06);border:1px solid rgba(248,113,113,.2);
+  border-radius:8px;padding:.7rem;margin:.5rem 0;
+  font-size:.83rem;color:var(--red);
+}
+
+.q-actions{display:flex;gap:.8rem;margin-top:1rem;flex-wrap:wrap}
+.accuracy-bar-wrap{
+  display:flex;align-items:center;gap:.8rem;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:.8rem 1rem;margin-bottom:1rem;
+}
+.acc-stat{text-align:center;flex:1}
+.acc-val{font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--accent)}
+.acc-lab{font-size:.72rem;color:var(--text3)}
+
+/* ===== TEACH ME TAB ===== */
+.teach-grid{display:grid;grid-template-columns:260px 1fr;gap:1.2rem;min-height:60vh}
+@media(max-width:700px){.teach-grid{grid-template-columns:1fr}}
+.teach-sidebar{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1rem;height:fit-content;
+}
+.topic-list{display:flex;flex-direction:column;gap:.3rem}
+.topic-item{
+  padding:.6rem .8rem;border-radius:8px;cursor:pointer;
+  font-size:.83rem;color:var(--text2);transition:all .2s;
+  border:1px solid transparent;
+}
+.topic-item:hover{background:var(--surface2);color:var(--text)}
+.topic-item.active{
+  background:rgba(248,200,220,.08);border-color:rgba(248,200,220,.25);
+  color:var(--accent);
+}
+.topic-item .t-sub{font-size:.72rem;color:var(--text3)}
+.teach-content{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1.5rem;min-height:400px;
+}
+.ncert-line{
+  background:linear-gradient(135deg,rgba(248,200,220,.06),rgba(245,200,66,.04));
+  border:1px solid rgba(248,200,220,.2);border-radius:10px;
+  padding:1rem;margin:1rem 0;
+}
+.ncert-line-label{
+  font-size:.7rem;font-weight:700;color:var(--accent);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem;
+}
+.ncert-line-text{font-size:.88rem;color:var(--text);line-height:1.6;font-style:italic}
+.revision-box{
+  background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.2);
+  border-radius:10px;padding:1rem;margin:1rem 0;
+}
+.revision-box-label{font-size:.7rem;font-weight:700;color:var(--green);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem}
+.expected-q{
+  background:rgba(96,165,250,.05);border:1px solid rgba(96,165,250,.2);
+  border-radius:10px;padding:1rem;margin:1rem 0;
+}
+.expected-q-label{font-size:.7rem;font-weight:700;color:var(--blue);
+  text-transform:uppercase;letter-spacing:.1em;margin-bottom:.4rem}
+.formula-chip{
+  display:inline-flex;align-items:center;gap:.4rem;
+  background:rgba(248,200,220,.08);border:1px solid rgba(248,200,220,.2);
+  border-radius:6px;padding:.3rem .8rem;font-size:.85rem;
+  font-family:'JetBrains Mono',monospace;color:var(--accent);
+  margin:.2rem;
+}
+
+/* ===== ASK DOUBT TAB ===== */
+.chat-wrap{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;display:flex;flex-direction:column;height:65vh;
+}
+.chat-header{
+  padding:1rem 1.2rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:.8rem;
+}
+.ai-avatar{
+  width:38px;height:38px;border-radius:50%;
+  background:linear-gradient(135deg,var(--accent),var(--accent3));
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.1rem;flex-shrink:0;
+}
+.ai-name{font-weight:600;font-size:.9rem}
+.ai-status{font-size:.75rem;color:var(--green);display:flex;align-items:center;gap:.3rem}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--green);
+  animation:blink 2s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+.chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.8rem}
+.msg{display:flex;gap:.8rem;animation:fadeUp .2s ease}
+.msg.user{flex-direction:row-reverse}
+.msg-bubble{
+  max-width:80%;padding:.8rem 1rem;border-radius:12px;
+  font-size:.87rem;line-height:1.6;
+}
+.msg.ai .msg-bubble{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:4px 12px 12px 12px;color:var(--text2);
+}
+.msg.user .msg-bubble{
+  background:linear-gradient(135deg,rgba(248,200,220,.2),rgba(248,200,220,.1));
+  border:1px solid rgba(248,200,220,.3);
+  border-radius:12px 4px 12px 12px;color:var(--text);
+}
+.msg-avatar{
+  width:30px;height:30px;border-radius:50%;
+  background:var(--surface2);border:1px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:.9rem;flex-shrink:0;align-self:flex-end;
+}
+.chat-input-wrap{
+  padding:1rem;border-top:1px solid var(--border);
+  display:flex;gap:.8rem;
+}
+.chat-input-wrap textarea{
+  flex:1;resize:none;height:56px;min-height:56px;
+  border-radius:10px;padding:.8rem 1rem;
+}
+.thinking-dots span{
+  animation:dots 1.2s infinite;display:inline-block;
+  opacity:0;
+}
+.thinking-dots span:nth-child(2){animation-delay:.2s}
+.thinking-dots span:nth-child(3){animation-delay:.4s}
+@keyframes dots{0%,80%,100%{opacity:0}40%{opacity:1}}
+.quick-q{
+  display:flex;gap:.5rem;flex-wrap:wrap;padding:.5rem 1rem;
+  border-bottom:1px solid var(--border);
+}
+.quick-q-btn{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:20px;padding:.3rem .8rem;font-size:.75rem;
+  color:var(--text3);cursor:pointer;transition:all .2s;white-space:nowrap;
+  font-family:'DM Sans',sans-serif;
+}
+.quick-q-btn:hover{border-color:var(--accent);color:var(--accent)}
+
+/* ===== PROGRESS TAB ===== */
+.prog-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:1rem;margin-bottom:1.5rem}
+.prog-stat-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1.2rem;text-align:center;
+}
+.prog-stat-val{
+  font-family:'Cinzel',serif;font-size:2rem;font-weight:900;
+  background:linear-gradient(135deg,var(--accent),var(--gold));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.prog-stat-lab{font-size:.75rem;color:var(--text3);margin-top:.2rem}
+.rank-predictor{
+  background:linear-gradient(135deg,rgba(245,200,66,.08),rgba(248,200,220,.06));
+  border:1px solid rgba(245,200,66,.3);border-radius:14px;
+  padding:1.5rem;margin-bottom:1.5rem;
+}
+.predicted-rank{
+  font-family:'Cinzel',serif;font-size:2.5rem;font-weight:900;
+  color:var(--gold);text-align:center;margin:.5rem 0;
+}
+.weak-topic-row{
+  display:flex;align-items:center;gap:.8rem;
+  padding:.7rem 0;border-bottom:1px solid rgba(42,42,62,.5);
+}
+.weak-topic-row:last-child{border-bottom:none}
+.weak-name{flex:1;font-size:.85rem;color:var(--text2)}
+.weak-pct{font-size:.8rem;font-family:'JetBrains Mono',monospace}
+.lvl-badge{
+  display:inline-flex;align-items:center;gap:.4rem;
+  padding:.4rem 1rem;border-radius:30px;font-size:.8rem;font-weight:700;
+  font-family:'Cinzel',serif;letter-spacing:.05em;
+}
+.lvl-beginner{background:rgba(96,165,250,.12);color:var(--blue);border:1px solid rgba(96,165,250,.3)}
+.lvl-rising{background:rgba(74,222,128,.12);color:var(--green);border:1px solid rgba(74,222,128,.3)}
+.lvl-advanced{background:rgba(248,200,220,.12);color:var(--accent);border:1px solid rgba(248,200,220,.3)}
+.lvl-air{background:rgba(245,200,66,.12);color:var(--gold);border:1px solid rgba(245,200,66,.4)}
+
+/* ===== EXAM MODE ===== */
+#exam-overlay{
+  display:none;position:fixed;inset:0;background:rgba(6,6,10,.97);
+  z-index:500;flex-direction:column;
+  backdrop-filter:blur(10px);
+}
+#exam-overlay.active{display:flex}
+.exam-header{
+  padding:1rem 1.5rem;border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);
+}
+.exam-timer-big{
+  font-family:'JetBrains Mono',monospace;font-size:1.8rem;font-weight:700;
+  color:var(--accent);
+}
+.exam-timer-big.warn{color:var(--red)}
+.exam-body{display:flex;gap:1rem;flex:1;overflow:hidden;padding:1rem}
+.exam-sidebar-q{
+  width:200px;flex-shrink:0;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:1rem;overflow-y:auto;
+}
+.q-dot-grid{display:flex;flex-wrap:wrap;gap:.4rem}
+.q-dot{
+  width:28px;height:28px;border-radius:6px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:.7rem;font-weight:700;cursor:pointer;
+  background:var(--surface2);border:1px solid var(--border);
+  color:var(--text3);transition:all .15s;
+  font-family:'JetBrains Mono',monospace;
+}
+.q-dot.current{border-color:var(--accent);color:var(--accent)}
+.q-dot.answered{background:rgba(74,222,128,.15);border-color:rgba(74,222,128,.4);color:var(--green)}
+.q-dot.marked{background:rgba(245,200,66,.12);border-color:rgba(245,200,66,.4);color:var(--gold)}
+.exam-main{flex:1;overflow-y:auto;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.5rem}
+.exam-controls{
+  display:flex;gap:.8rem;justify-content:center;padding:1rem;
+  border-top:1px solid var(--border);flex-wrap:wrap;
+}
+
+/* ===== DAILY PLAN ===== */
+.plan-item{
+  display:flex;gap:1rem;padding:.9rem 0;
+  border-bottom:1px solid rgba(42,42,62,.4);
+  align-items:flex-start;
+}
+.plan-time{
+  font-family:'JetBrains Mono',monospace;font-size:.78rem;
+  color:var(--accent);flex-shrink:0;width:70px;
+  padding-top:2px;
+}
+.plan-label{font-size:.85rem;color:var(--text2);line-height:1.4}
+.plan-tag{font-size:.72rem;color:var(--text3)}
+.plan-check{
+  width:20px;height:20px;border-radius:4px;
+  border:1.5px solid var(--border);margin-left:auto;cursor:pointer;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  transition:all .2s;
+}
+.plan-check.done{background:var(--green);border-color:var(--green)}
+
+/* ===== FLOATING BRAIN MODE ===== */
+.brain-mode-float{
+  position:fixed;bottom:1.5rem;right:1.5rem;z-index:200;
+}
+.brain-btn{
+  background:linear-gradient(135deg,var(--accent),var(--accent3));
+  color:#06060a;border:none;border-radius:50%;
+  width:52px;height:52px;font-size:1.2rem;cursor:pointer;
+  box-shadow:0 4px 20px rgba(248,200,220,.35);
+  transition:all .2s;display:flex;align-items:center;justify-content:center;
+}
+.brain-btn:hover{transform:scale(1.08)}
+.brain-menu{
+  position:absolute;bottom:60px;right:0;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:12px;padding:.6rem;width:180px;
+  display:none;box-shadow:0 8px 30px rgba(0,0,0,.5);
+}
+.brain-menu.open{display:block;animation:fadeUp .2s ease}
+.brain-mode-opt{
+  display:flex;align-items:center;gap:.7rem;padding:.65rem .8rem;
+  border-radius:8px;cursor:pointer;font-size:.83rem;color:var(--text2);
+  transition:all .15s;
+}
+.brain-mode-opt:hover{background:var(--surface2);color:var(--text)}
+.brain-mode-opt .bm-ico{font-size:1rem}
+.current-mode-tag{
+  position:fixed;bottom:1.5rem;left:1.5rem;z-index:200;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:20px;padding:.4rem 1rem;font-size:.75rem;color:var(--text3);
+  display:flex;align-items:center;gap:.4rem;
+}
+
+/* ===== LOADING SPINNER ===== */
+.spinner{
+  display:inline-block;width:18px;height:18px;
+  border:2px solid var(--border);border-top-color:var(--accent);
+  border-radius:50%;animation:spin .6s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ===== TOAST ===== */
+#toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:10px;padding:.7rem 1.2rem;font-size:.85rem;color:var(--text);
+  opacity:0;transition:all .3s;z-index:9000;pointer-events:none;
+  max-width:90vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ===== MISTAKE LOG ===== */
+.mistake-item{
+  display:flex;gap:.8rem;padding:.9rem;
+  background:rgba(248,113,113,.04);border:1px solid rgba(248,113,113,.15);
+  border-radius:10px;margin-bottom:.6rem;align-items:flex-start;
+}
+.mistake-type{
+  padding:.2rem .5rem;border-radius:4px;font-size:.7rem;font-weight:700;
+  background:rgba(248,113,113,.15);color:var(--red);flex-shrink:0;
+  text-transform:uppercase;letter-spacing:.05em;
+}
+
+/* RESPONSIVE */
+@media(max-width:600px){
+  header{padding:.7rem 1rem}
+  .logo{font-size:.95rem}
+  .header-stats{display:none}
+  main{padding:1rem}
+  .overview-hero h1{font-size:1.3rem}
+  .exam-sidebar-q{display:none}
+}
+</style>
+</head>
+<body>
+
+<!-- LOADER -->
+<div id="loader">
+  <div class="loader-logo">PrepMind AI</div>
+  <div class="loader-sub">Made for Pooja · AIR Target System</div>
+  <div class="loader-steps">
+    <div class="loader-step" id="ls1"><div class="step-dot"></div>Analyzing NCERT Class 11 & 12...</div>
+    <div class="loader-step" id="ls2"><div class="step-dot"></div>Mapping 20 years of PYQs...</div>
+    <div class="loader-step" id="ls3"><div class="step-dot"></div>Building rank strategy for Pooja...</div>
+    <div class="loader-step" id="ls4"><div class="step-dot"></div>Activating AI Coach...</div>
+  </div>
+  <div class="loader-bar-wrap"><div class="loader-bar" id="loaderBar"></div></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<header>
+  <div class="logo">PrepMind AI <span>Made for Pooja · NEET UG</span></div>
+  <div class="header-stats">
+    <div class="stat-chip streak-chip"><span class="ico">🔥</span>Streak <span class="val" id="streakVal">0</span>d</div>
+    <div class="stat-chip xp-chip"><span class="ico">⚡</span>XP <span class="val" id="xpVal">0</span></div>
+    <div class="stat-chip"><span class="ico">🎯</span>Acc <span class="val" id="accVal">--%</span></div>
+    <button class="btn btn-gold btn-sm" onclick="startExamMode()">⚔️ Exam Mode</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab-btn active" onclick="switchTab('overview',this)"><span class="t-ico">🏆</span>AIR Strategy</button>
+  <button class="tab-btn" onclick="switchTab('practice',this)"><span class="t-ico">🧠</span>Practice</button>
+  <button class="tab-btn" onclick="switchTab('teach',this)"><span class="t-ico">📘</span>Teach Me</button>
+  <button class="tab-btn" onclick="switchTab('doubt',this)"><span class="t-ico">💬</span>Ask Doubt</button>
+  <button class="tab-btn" onclick="switchTab('progress',this)"><span class="t-ico">📈</span>Progress</button>
+  <button class="tab-btn" onclick="switchTab('plan',this)"><span class="t-ico">📅</span>Daily Plan</button>
+</nav>
+
+<main>
+
+<!-- TAB 1: OVERVIEW -->
+<div class="tab-panel active" id="tab-overview">
+  <div class="overview-hero">
+    <div class="air-badge">🏆 TARGET: AIR 1 — NEET UG 2025</div>
+    <h1>Pooja's Rank Generation Engine</h1>
+    <p>The NCERT is your weapon. The PYQs are your battlefield. Every chapter, every concept, every minute is optimized for one goal — the top rank.</p>
+  </div>
+
+  <div class="grid3" style="margin-bottom:1.5rem">
+    <div class="subject-card">
+      <div class="subj-icon">🔬</div>
+      <div class="subj-name">Biology</div>
+      <div class="subj-marks">Marks: <b>360</b> · 90 Qs</div>
+      <div style="margin-top:.8rem"><div class="prog-wrap"><div class="prog-fill prog-accent" style="width:50%"></div></div></div>
+      <div style="font-size:.72rem;color:var(--text3);margin-top:.3rem">50% of total marks — Priority #1</div>
+    </div>
+    <div class="subject-card">
+      <div class="subj-icon">⚗️</div>
+      <div class="subj-name">Chemistry</div>
+      <div class="subj-marks">Marks: <b>180</b> · 45 Qs</div>
+      <div style="margin-top:.8rem"><div class="prog-wrap"><div class="prog-fill prog-gold" style="width:25%"></div></div></div>
+      <div style="font-size:.72rem;color:var(--text3);margin-top:.3rem">25% of total — Scoring + Numerical</div>
+    </div>
+    <div class="subject-card">
+      <div class="subj-icon">⚡</div>
+      <div class="subj-name">Physics</div>
+      <div class="subj-marks">Marks: <b>180</b> · 45 Qs</div>
+      <div style="margin-top:.8rem"><div class="prog-wrap"><div class="prog-fill prog-green" style="width:25%"></div></div></div>
+      <div style="font-size:.72rem;color:var(--text3);margin-top:.3rem">25% of total — Concept + Formula</div>
+    </div>
+  </div>
+
+  <div class="grid2" style="margin-bottom:1.5rem">
+    <div class="card">
+      <div class="card-title">📊 High-Frequency Biology Chapters</div>
+      <div id="bio-chapters"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚡ High-Frequency Physics & Chemistry</div>
+      <div id="pc-chapters"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:1.5rem">
+    <div class="card-title">🔥 AIR Topper Strategy — How Rankers Think</div>
+    <div id="topper-tips"></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">🧠 Memory Science for NEET</div>
+      <div class="topper-tip"><span class="tip-ico">🔄</span><div><b style="color:var(--text)">Spaced Repetition:</b> Revise Biology diagrams at Day 1, 3, 7, 14. Your brain retains 90% vs 20% with cramming.</div></div>
+      <div class="topper-tip"><span class="tip-ico">🎯</span><div><b style="color:var(--text)">Active Recall:</b> Close the book, write what you remember. NCERT lines become automatic.</div></div>
+      <div class="topper-tip"><span class="tip-ico">🗺️</span><div><b style="color:var(--text)">Mind Maps:</b> Chapter → Topic → Subtopic → PYQ link. Makes revision 5x faster.</div></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⏱ Speed + Accuracy Formula</div>
+      <div class="topper-tip"><span class="tip-ico">1️⃣</span><div>Biology first — attempt all 90 in 50 min. Zero negative marking for good readers.</div></div>
+      <div class="topper-tip"><span class="tip-ico">2️⃣</span><div>Chemistry next — 40 min. Inorganic = direct NCERT. Physical = formula. Organic = mechanism.</div></div>
+      <div class="topper-tip"><span class="tip-ico">3️⃣</span><div>Physics last — 50 min. Solve calculation-based first. Skip conceptually tricky early.</div></div>
+      <div class="topper-tip"><span class="tip-ico">⚠️</span><div><b style="color:var(--red)">NEVER:</b> Leave easy Qs for hard ones. 4 marks vs -1 mark decision matters.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 2: PRACTICE -->
+<div class="tab-panel" id="tab-practice">
+  <div class="accuracy-bar-wrap">
+    <div class="acc-stat"><div class="acc-val" id="pAcc">--%</div><div class="acc-lab">Accuracy</div></div>
+    <div class="acc-stat"><div class="acc-val" id="pCorrect">0</div><div class="acc-lab">Correct</div></div>
+    <div class="acc-stat"><div class="acc-val" id="pWrong">0</div><div class="acc-lab">Wrong</div></div>
+    <div class="acc-stat"><div class="acc-val" id="pScore">0</div><div class="acc-lab">Score</div></div>
+    <button class="btn btn-secondary btn-sm" onclick="resetPractice()">↺ Reset</button>
+  </div>
+
+  <div class="q-filters">
+    <select id="f-subject" onchange="filterQuestions()">
+      <option value="all">All Subjects</option>
+      <option value="biology">🔬 Biology</option>
+      <option value="chemistry">⚗️ Chemistry</option>
+      <option value="physics">⚡ Physics</option>
+    </select>
+    <select id="f-difficulty" onchange="filterQuestions()">
+      <option value="all">All Difficulty</option>
+      <option value="easy">Easy</option>
+      <option value="medium">Medium</option>
+      <option value="hard">Hard</option>
+      <option value="ranker">Ranker Level</option>
+    </select>
+    <select id="f-chapter" onchange="filterQuestions()">
+      <option value="all">All Chapters</option>
+    </select>
+    <button class="btn btn-primary btn-sm" onclick="loadAIQuestion()">⚡ AI Question</button>
+    <button class="btn btn-secondary btn-sm" onclick="nextQuestion()">Next →</button>
+  </div>
+
+  <div id="practice-area"></div>
+</div>
+
+<!-- TAB 3: TEACH ME -->
+<div class="tab-panel" id="tab-teach">
+  <div class="teach-grid">
+    <div class="teach-sidebar">
+      <div style="font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.8rem">NCERT Topics</div>
+      <select id="teach-subject" onchange="updateTopicList()" style="margin-bottom:.8rem">
+        <option value="biology">🔬 Biology</option>
+        <option value="chemistry">⚗️ Chemistry</option>
+        <option value="physics">⚡ Physics</option>
+      </select>
+      <div class="topic-list" id="topic-list"></div>
+    </div>
+    <div class="teach-content" id="teach-content">
+      <div style="text-align:center;padding:2rem;color:var(--text3)">
+        <div style="font-size:2rem;margin-bottom:.5rem">📘</div>
+        <div>Select a topic to start learning with NCERT mastery</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 4: DOUBT -->
+<div class="tab-panel" id="tab-doubt">
+  <div class="chat-wrap">
+    <div class="chat-header">
+      <div class="ai-avatar">🎓</div>
+      <div>
+        <div class="ai-name">PrepMind AI Coach</div>
+        <div class="ai-status"><span class="status-dot"></span>NCERT Expert · ALLEN-level Mentor</div>
+      </div>
+    </div>
+    <div class="quick-q">
+      <div class="quick-q-btn" onclick="quickAsk('Explain the cell cycle with NCERT reference')">Cell Cycle</div>
+      <div class="quick-q-btn" onclick="quickAsk('Hybridization of SF6 with explanation')">SF6 Hybridization</div>
+      <div class="quick-q-btn" onclick="quickAsk('Derive lens maker equation step by step')">Lens Formula</div>
+      <div class="quick-q-btn" onclick="quickAsk('Most important NCERT lines in Genetics')">Genetics Key Lines</div>
+      <div class="quick-q-btn" onclick="quickAsk('Quick revision trick for hormones in biology')">Hormones Trick</div>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div class="msg ai">
+        <div class="msg-avatar">🎓</div>
+        <div class="msg-bubble">
+          Namaste Pooja! 🙏 I'm your personal PrepMind AI Coach — think of me as your ALLEN/Aakash faculty, available 24/7.<br><br>
+          Ask me <b>anything</b> about NCERT Biology, Chemistry, or Physics. I'll explain with shortcuts, memory tricks, and exam-focused logic. What's confusing you today? 💪
+        </div>
+      </div>
+    </div>
+    <div class="chat-input-wrap">
+      <textarea id="doubt-input" placeholder="Type your doubt... (e.g., 'Explain DNA replication' or 'Why is hybridization of BF3 sp2?')" onkeydown="handleChatKey(event)"></textarea>
+      <button class="btn btn-primary" onclick="sendDoubt()" id="send-btn">Send ➤</button>
+    </div>
+  </div>
+</div>
+
+<!-- TAB 5: PROGRESS -->
+<div class="tab-panel" id="tab-progress">
+  <div class="prog-grid">
+    <div class="prog-stat-card">
+      <div class="prog-stat-val" id="total-questions-done">0</div>
+      <div class="prog-stat-lab">Questions Solved</div>
+    </div>
+    <div class="prog-stat-card">
+      <div class="prog-stat-val" id="total-accuracy">--%</div>
+      <div class="prog-stat-lab">Overall Accuracy</div>
+    </div>
+    <div class="prog-stat-card">
+      <div class="prog-stat-val" id="total-xp-disp">0</div>
+      <div class="prog-stat-lab">XP Earned</div>
+    </div>
+    <div class="prog-stat-card">
+      <div class="prog-stat-val" id="total-streak-disp">0</div>
+      <div class="prog-stat-lab">Day Streak</div>
+    </div>
+  </div>
+
+  <div class="rank-predictor">
+    <div class="card-title" style="justify-content:center">🏆 AI Rank Prediction</div>
+    <div class="predicted-rank" id="predicted-rank">AIR —</div>
+    <div style="text-align:center;font-size:.82rem;color:var(--text3)" id="rank-message">Solve more questions to unlock rank prediction</div>
+    <div style="margin-top:1rem">
+      <div style="display:flex;justify-content:space-between;font-size:.78rem;color:var(--text3);margin-bottom:.4rem">
+        <span>Score Estimate</span>
+        <span id="score-estimate">— / 720</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill prog-gold" id="rank-bar" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <div class="card-title">📊 Subject Performance</div>
+      <div id="subject-perf"></div>
+    </div>
+    <div class="card">
+      <div class="card-title">⚠️ Weak Areas (Need Attention)</div>
+      <div id="weak-areas"></div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top:1rem">
+    <div class="card-title">🔴 Mistake Analyzer</div>
+    <div id="mistake-log"></div>
+  </div>
+
+  <div class="card" style="margin-top:1rem">
+    <div class="card-title">🏅 Rank Level</div>
+    <div style="display:flex;align-items:center;gap:1rem;flex-wrap:wrap">
+      <div id="rank-level-badge"></div>
+      <div style="flex:1">
+        <div style="font-size:.82rem;color:var(--text2);margin-bottom:.5rem" id="rank-level-desc">Keep solving to level up!</div>
+        <div class="prog-wrap"><div class="prog-fill prog-accent" id="level-bar" style="width:0%"></div></div>
+        <div style="display:flex;justify-content:space-between;font-size:.72rem;color:var(--text3);margin-top:.3rem">
+          <span>Beginner</span><span>Rising Star</span><span>Advanced</span><span>AIR Mode</span>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:1rem">
+      <button class="btn btn-primary" onclick="generateAIRevisionPlan()">🤖 Get AI Revision Plan</button>
+    </div>
+    <div id="revision-plan-output" style="margin-top:1rem"></div>
+  </div>
+</div>
+
+<!-- TAB 6: DAILY PLAN -->
+<div class="tab-panel" id="tab-plan">
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;flex-wrap:wrap;gap:.8rem">
+    <div>
+      <div class="section-title">📅 Today's AI Study Plan</div>
+      <div class="section-sub">Optimized for Pooja's target — completing all sections earns bonus XP</div>
+    </div>
+    <button class="btn btn-primary" onclick="generateDailyPlan()">🤖 Generate Today's Plan</button>
+  </div>
+  <div id="daily-plan-area">
+    <div style="text-align:center;padding:2rem;color:var(--text3)">
+      <div style="font-size:2rem;margin-bottom:.5rem">📅</div>
+      <div>Click "Generate Today's Plan" to get your personalized NCERT + PYQ schedule</div>
+    </div>
+  </div>
+</div>
+
+</main>
+</div>
+
+<!-- EXAM OVERLAY -->
+<div id="exam-overlay">
+  <div class="exam-header">
+    <div>
+      <div style="font-family:'Cinzel',serif;font-size:1rem;font-weight:700;color:var(--accent)">⚔️ NEET UG Mock Exam</div>
+      <div style="font-size:.75rem;color:var(--text3)">180 Questions · 720 Marks · -1 Negative</div>
+    </div>
+    <div class="exam-timer-big" id="exam-timer">3:00:00</div>
+    <div style="display:flex;gap:.8rem">
+      <div style="text-align:center">
+        <div style="font-size:1.2rem;font-weight:700;color:var(--green)" id="exam-ans-count">0</div>
+        <div style="font-size:.7rem;color:var(--text3)">Answered</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:1.2rem;font-weight:700;color:var(--gold)" id="exam-mark-count">0</div>
+        <div style="font-size:.7rem;color:var(--text3)">Marked</div>
+      </div>
+      <button class="btn btn-secondary btn-sm" onclick="submitExam()">Submit Exam</button>
+      <button class="btn btn-secondary btn-sm" onclick="closeExam()">✕</button>
+    </div>
+  </div>
+  <div class="exam-body">
+    <div class="exam-sidebar-q">
+      <div style="font-size:.72rem;color:var(--text3);margin-bottom:.6rem;text-transform:uppercase;letter-spacing:.08em">Questions</div>
+      <div class="q-dot-grid" id="q-dot-grid"></div>
+    </div>
+    <div class="exam-main" id="exam-main"></div>
+  </div>
+  <div class="exam-controls">
+    <button class="btn btn-secondary" onclick="examNav(-1)">← Prev</button>
+    <button class="btn btn-secondary" onclick="markForReview()">🔖 Mark for Review</button>
+    <button class="btn btn-secondary" onclick="clearExamAnswer()">Clear</button>
+    <button class="btn btn-primary" onclick="examNav(1)">Next →</button>
+  </div>
+</div>
+
+<!-- BRAIN MODE FLOAT -->
+<div class="brain-mode-float">
+  <button class="brain-btn" onclick="toggleBrainMenu()" title="Brain Mode">🧠</button>
+  <div class="brain-menu" id="brain-menu">
+    <div class="brain-mode-opt" onclick="setBrainMode('learning')"><span class="bm-ico">📖</span>Learning Mode</div>
+    <div class="brain-mode-opt" onclick="setBrainMode('speed')"><span class="bm-ico">⚡</span>Speed Mode</div>
+    <div class="brain-mode-opt" onclick="setBrainMode('exam')"><span class="bm-ico">⚔️</span>Exam Mode</div>
+    <div class="brain-mode-opt" onclick="setBrainMode('revision')"><span class="bm-ico">🔄</span>Revision Mode</div>
+  </div>
+</div>
+<div class="current-mode-tag" id="mode-tag">📖 Learning Mode</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script>
+// ===== STATE =====
+const STATE = {
+  xp: 0, streak: 0, correct: 0, wrong: 0, totalQ: 0,
+  brainMode: 'learning',
+  mistakes: [],
+  topicPerf: {},
+  lastSeen: null,
+  examAnswers: {},
+  examMarked: new Set(),
+  currentExamQ: 0,
+  examTimerInt: null,
+  examSeconds: 10800,
+  chatHistory: [],
+};
+
+function saveState() {
+  try { localStorage.setItem('prepMind_pooja', JSON.stringify({...STATE, examMarked: [...STATE.examMarked]})); } catch(e){}
+}
+function loadState() {
+  try {
+    const s = localStorage.getItem('prepMind_pooja');
+    if (s) {
+      const d = JSON.parse(s);
+      Object.assign(STATE, d);
+      STATE.examMarked = new Set(d.examMarked || []);
+      checkStreak();
+    }
+  } catch(e){}
+}
+function checkStreak() {
+  const today = new Date().toDateString();
+  if (STATE.lastSeen === today) return;
+  const yesterday = new Date(Date.now() - 86400000).toDateString();
+  if (STATE.lastSeen === yesterday) { STATE.streak++; }
+  else if (STATE.lastSeen && STATE.lastSeen !== today) { STATE.streak = 1; }
+  else { STATE.streak = Math.max(1, STATE.streak); }
+  STATE.lastSeen = today;
+  saveState();
+}
+
+// ===== QUESTION BANK =====
+const QUESTIONS = [
+  {id:1,subject:'biology',chapter:'Cell: Unit of Life',difficulty:'medium',pyq:2022,
+   text:'Which of the following is the correct sequence of events in mitosis?',
+   options:['Prophase → Metaphase → Anaphase → Telophase','Metaphase → Prophase → Anaphase → Telophase','Prophase → Anaphase → Metaphase → Telophase','Telophase → Anaphase → Metaphase → Prophase'],
+   correct:0,
+   explanation:'NCERT Class 11 Ch.10: Mitosis proceeds as PMAT — Prophase, Metaphase, Anaphase, Telophase. During metaphase, chromosomes align at the equatorial plate.',
+   trick:'Remember: PMAT = Please Meet A Teacher',
+   trap:'Many confuse anaphase (chromatid separation) with anaphase I of meiosis (homologue separation).',
+   ncert:'NCERT Class 11, Chapter 10 — Cell Cycle and Cell Division'},
+
+  {id:2,subject:'biology',chapter:'Genetics',difficulty:'hard',pyq:2021,
+   text:'A cross between a heterozygous tall pea plant and a dwarf pea plant will produce progeny in the ratio:',
+   options:['3 Tall : 1 Dwarf','1 Tall : 1 Dwarf','All Tall','All Dwarf'],
+   correct:1,
+   explanation:'NCERT Class 12 Ch.5: This is a test cross (Tt × tt). Offspring: 50% Tt (Tall) and 50% tt (Dwarf). Ratio = 1:1.',
+   trick:'Test cross always gives 1:1 ratio when one parent is heterozygous.',
+   trap:'Students confuse test cross with monohybrid cross (Tt × Tt which gives 3:1).',
+   ncert:'NCERT Class 12, Chapter 5 — Principles of Inheritance and Variation'},
+
+  {id:3,subject:'biology',chapter:'Photosynthesis',difficulty:'medium',pyq:2023,
+   text:'Which of the following is the primary pigment involved in photosynthesis?',
+   options:['Chlorophyll a','Chlorophyll b','Carotenoids','Xanthophylls'],
+   correct:0,
+   explanation:'NCERT Class 11 Ch.13: Chlorophyll a is the primary photosynthetic pigment. It is present in the reaction center and directly involved in light reactions.',
+   trick:'Only Chlorophyll a is in the reaction centre — b and others are accessory pigments.',
+   trap:'All options are pigments but only Chl a is PRIMARY (reaction center pigment).',
+   ncert:'NCERT Class 11, Chapter 13 — Photosynthesis in Higher Plants'},
+
+  {id:4,subject:'biology',chapter:'Human Physiology',difficulty:'hard',pyq:2020,
+   text:'Which enzyme is responsible for the conversion of pepsinogen to pepsin?',
+   options:['Enterokinase','HCl','Pepsin itself (autocatalysis)','Trypsin'],
+   correct:1,
+   explanation:'NCERT Class 11 Ch.16: HCl secreted by oxyntic (parietal) cells converts inactive pepsinogen to active pepsin. Pepsin then also autocatalytically activates more pepsinogen.',
+   trick:'HCl → Pepsinogen to Pepsin. Remember: Acid ACTIVATES the stomach enzyme.',
+   trap:'Both HCl and pepsin (autocatalysis) can do it. But HCl is the PRIMARY activator — the question says "responsible" so HCl is correct.',
+   ncert:'NCERT Class 11, Chapter 16 — Digestion and Absorption'},
+
+  {id:5,subject:'biology',chapter:'Reproduction',difficulty:'medium',pyq:2019,
+   text:'The male gametophyte of angiosperms consists of:',
+   options:['3-celled structure','2-celled structure','4-celled structure','5-celled structure'],
+   correct:0,
+   explanation:'NCERT Class 12 Ch.2: Mature pollen grain (male gametophyte) has 3 cells — 1 vegetative cell and 2 male gametes (generative cell divides into 2 sperm cells).',
+   trick:'Pollen = 3 cells: 1 veg + 2 gametes. Easy mnemonic: 1+2=3.',
+   trap:'At the 2-nucleate stage (just after mitosis), it has 2 cells. At maturity, it has 3.',
+   ncert:'NCERT Class 12, Chapter 2 — Sexual Reproduction in Flowering Plants'},
+
+  {id:6,subject:'chemistry',chapter:'Chemical Bonding',difficulty:'medium',pyq:2022,
+   text:'The shape of XeF4 molecule is:',
+   options:['Tetrahedral','Square planar','Pyramidal','Linear'],
+   correct:1,
+   explanation:'NCERT Class 11 Ch.4: XeF4 has 6 electron pairs (4 bonding + 2 lone pairs). Based on VSEPR, the lone pairs are in axial positions making it square planar.',
+   trick:'XeF4: 6 ep → octahedral arrangement → 2 lone pairs equatorial opposite → Square Planar.',
+   trap:'Students guess tetrahedral because there are 4 F atoms. Always count lone pairs for VSEPR!',
+   ncert:'NCERT Class 11, Chapter 4 — Chemical Bonding and Molecular Structure'},
+
+  {id:7,subject:'chemistry',chapter:'Electrochemistry',difficulty:'hard',pyq:2021,
+   text:'For a cell reaction with ΔG° = -nFE°, if E° = 1.10V and n = 2, what is ΔG°? (F = 96500 C/mol)',
+   options:['-212300 J/mol','+212300 J/mol','-96500 J/mol','+96500 J/mol'],
+   correct:0,
+   explanation:'NCERT Class 12 Ch.3: ΔG° = -nFE° = -(2)(96500)(1.10) = -212300 J/mol = -212.3 kJ/mol. Negative ΔG° confirms spontaneous reaction.',
+   trick:'ΔG° = -nFE°. Negative E° → Non-spontaneous. Positive E° → Spontaneous (ΔG° negative).',
+   trap:'Confusing sign: spontaneous = negative ΔG° = POSITIVE E°cell. Always double-check signs.',
+   ncert:'NCERT Class 12, Chapter 3 — Electrochemistry'},
+
+  {id:8,subject:'chemistry',chapter:'Organic Chemistry',difficulty:'medium',pyq:2020,
+   text:'Which of the following is NOT an aromatic compound?',
+   options:['Benzene','Pyridine','Cyclooctatetraene','Naphthalene'],
+   correct:2,
+   explanation:'NCERT Class 11 Ch.13: Aromatic compounds must follow Hückel\'s rule (4n+2 π electrons, planar, conjugated). Cyclooctatetraene (COT) has 8 π electrons (4n, n=2), is tub-shaped and NOT aromatic.',
+   trick:'Hückel rule: 2, 6, 10, 14 π electrons = aromatic. 4, 8, 12 = antiaromatic.',
+   trap:'COT has alternating double bonds so students think it\'s aromatic. Check the count: 8π = 4n = antiaromatic.',
+   ncert:'NCERT Class 11, Chapter 13 — Hydrocarbons'},
+
+  {id:9,subject:'physics',chapter:'Laws of Motion',difficulty:'medium',pyq:2022,
+   text:'A body of mass 2 kg moving with velocity 5 m/s collides with a wall and rebounds with the same speed. The impulse is:',
+   options:['20 N·s','10 N·s','0 N·s','5 N·s'],
+   correct:0,
+   explanation:'NCERT Class 11 Ch.5: Impulse = Change in momentum = m(v-u) = 2(5-(-5)) = 2×10 = 20 N·s. Note velocity reversal: initial +5, final -5.',
+   trick:'Elastic bounce: impulse = 2mv. Here 2×2×5 = 20 N·s.',
+   trap:'Students calculate m×v = 2×5 = 10, forgetting the CHANGE means final minus initial (direction matters!).',
+   ncert:'NCERT Class 11, Chapter 5 — Laws of Motion'},
+
+  {id:10,subject:'physics',chapter:'Current Electricity',difficulty:'hard',pyq:2021,
+   text:'Three resistors 2Ω, 3Ω, and 6Ω are connected in parallel. The equivalent resistance is:',
+   options:['1 Ω','11 Ω','0.5 Ω','2 Ω'],
+   correct:0,
+   explanation:'NCERT Class 12 Ch.3: 1/R = 1/2 + 1/3 + 1/6 = 3/6 + 2/6 + 1/6 = 6/6 = 1. So R = 1Ω.',
+   trick:'For parallel: 1/R = sum of reciprocals. If values are 2,3,6 → LCM=6 → 3+2+1=6 → 1/R=6/6=1 → R=1Ω.',
+   trap:'Students add resistances directly (2+3+6=11) which is the SERIES formula. Parallel = reciprocals!',
+   ncert:'NCERT Class 12, Chapter 3 — Current Electricity'},
+
+  {id:11,subject:'biology',chapter:'Evolution',difficulty:'ranker',pyq:2018,
+   text:'Which of the following provides the most direct evidence for evolution?',
+   options:['Analogous organs','Vestigial organs','Homologous organs','Fossils'],
+   correct:3,
+   explanation:'NCERT Class 12 Ch.7: Fossils provide DIRECT evidence of evolution as they are the actual remains/impressions of organisms from previous geological periods. Homologous organs provide indirect anatomical evidence.',
+   trick:'DIRECT evidence = actual remains = Fossils. Homologous/analogous = indirect (anatomical) evidence.',
+   trap:'Many choose homologous organs. But the keyword is MOST DIRECT — fossils are real preserved specimens.',
+   ncert:'NCERT Class 12, Chapter 7 — Evolution'},
+
+  {id:12,subject:'chemistry',chapter:'Coordination Chemistry',difficulty:'ranker',pyq:2019,
+   text:'The IUPAC name of [Co(NH3)5Cl]Cl2 is:',
+   options:['Pentaaminechlorocobalt(III) chloride','Pentaamminechloridocobalt(III) chloride','Chloropentaaminecobalt(III) chloride','Pentaamminecobalt(III) chloride'],
+   correct:1,
+   explanation:'NCERT Class 12 Ch.9: Ligands named alphabetically (ammine before chlorido). Inner sphere: 5 NH3 (pentaammine) + Cl (chlorido) + Co(III). Outer: 2 Cl- = dichloride.',
+   trick:'Ligand order: alphabetical. NH3=ammine, Cl=chlorido. Metal last with ox. state.',
+   trap:'Students write "chloro" instead of "chlorido" (modern IUPAC). Also confuse inner vs outer sphere Cl.',
+   ncert:'NCERT Class 12, Chapter 9 — Coordination Compounds'},
+];
+
+// ===== NCERT TOPICS =====
+const TOPICS = {
+  biology: [
+    {name:'The Living World', ch:'Ch.1', freq:'Low', class:'11'},
+    {name:'Biological Classification', ch:'Ch.2', freq:'High', class:'11'},
+    {name:'Plant Kingdom', ch:'Ch.3', freq:'High', class:'11'},
+    {name:'Animal Kingdom', ch:'Ch.4', freq:'High', class:'11'},
+    {name:'Morphology of Flowering Plants', ch:'Ch.5', freq:'High', class:'11'},
+    {name:'Anatomy of Flowering Plants', ch:'Ch.6', freq:'Medium', class:'11'},
+    {name:'Cell: Unit of Life', ch:'Ch.8', freq:'High', class:'11'},
+    {name:'Cell Cycle & Division', ch:'Ch.10', freq:'High', class:'11'},
+    {name:'Photosynthesis', ch:'Ch.13', freq:'High', class:'11'},
+    {name:'Respiration in Plants', ch:'Ch.14', freq:'Medium', class:'11'},
+    {name:'Digestion & Absorption', ch:'Ch.16', freq:'High', class:'11'},
+    {name:'Breathing & Exchange', ch:'Ch.17', freq:'Medium', class:'11'},
+    {name:'Body Fluids & Circulation', ch:'Ch.18', freq:'High', class:'11'},
+    {name:'Excretory Products', ch:'Ch.19', freq:'High', class:'11'},
+    {name:'Sexual Reproduction in Flowering Plants', ch:'Ch.2', freq:'High', class:'12'},
+    {name:'Human Reproduction', ch:'Ch.3', freq:'High', class:'12'},
+    {name:'Reproductive Health', ch:'Ch.4', freq:'Medium', class:'12'},
+    {name:'Genetics (Mendelian)', ch:'Ch.5', freq:'High', class:'12'},
+    {name:'Molecular Basis of Inheritance', ch:'Ch.6', freq:'High', class:'12'},
+    {name:'Evolution', ch:'Ch.7', freq:'High', class:'12'},
+    {name:'Human Health & Disease', ch:'Ch.8', freq:'High', class:'12'},
+    {name:'Strategies for Enhancement', ch:'Ch.9', freq:'Medium', class:'12'},
+    {name:'Microbes in Human Welfare', ch:'Ch.10', freq:'Medium', class:'12'},
+    {name:'Biotechnology Principles', ch:'Ch.11', freq:'High', class:'12'},
+    {name:'Biotechnology Applications', ch:'Ch.12', freq:'High', class:'12'},
+    {name:'Organisms & Populations', ch:'Ch.13', freq:'Medium', class:'12'},
+    {name:'Ecosystem', ch:'Ch.14', freq:'Medium', class:'12'},
+    {name:'Biodiversity', ch:'Ch.15', freq:'Medium', class:'12'},
+  ],
+  chemistry: [
+    {name:'Some Basic Concepts', ch:'Ch.1', freq:'Low', class:'11'},
+    {name:'Structure of Atom', ch:'Ch.2', freq:'High', class:'11'},
+    {name:'Classification of Elements', ch:'Ch.3', freq:'High', class:'11'},
+    {name:'Chemical Bonding', ch:'Ch.4', freq:'High', class:'11'},
+    {name:'States of Matter', ch:'Ch.5', freq:'Medium', class:'11'},
+    {name:'Thermodynamics', ch:'Ch.6', freq:'High', class:'11'},
+    {name:'Equilibrium', ch:'Ch.7', freq:'High', class:'11'},
+    {name:'Redox Reactions', ch:'Ch.8', freq:'Medium', class:'11'},
+    {name:'Organic Chemistry Basics', ch:'Ch.12', freq:'High', class:'11'},
+    {name:'Hydrocarbons', ch:'Ch.13', freq:'High', class:'11'},
+    {name:'Solutions', ch:'Ch.2', freq:'High', class:'12'},
+    {name:'Electrochemistry', ch:'Ch.3', freq:'High', class:'12'},
+    {name:'Chemical Kinetics', ch:'Ch.4', freq:'High', class:'12'},
+    {name:'Surface Chemistry', ch:'Ch.5', freq:'Medium', class:'12'},
+    {name:'p-Block Elements', ch:'Ch.7', freq:'High', class:'12'},
+    {name:'d and f Block Elements', ch:'Ch.8', freq:'High', class:'12'},
+    {name:'Coordination Compounds', ch:'Ch.9', freq:'High', class:'12'},
+    {name:'Haloalkanes & Haloarenes', ch:'Ch.10', freq:'High', class:'12'},
+    {name:'Alcohols, Phenols, Ethers', ch:'Ch.11', freq:'High', class:'12'},
+    {name:'Aldehydes & Ketones', ch:'Ch.12', freq:'High', class:'12'},
+    {name:'Amines', ch:'Ch.13', freq:'High', class:'12'},
+    {name:'Biomolecules', ch:'Ch.14', freq:'High', class:'12'},
+  ],
+  physics: [
+    {name:'Physical World & Units', ch:'Ch.1', freq:'Low', class:'11'},
+    {name:'Motion in a Straight Line', ch:'Ch.3', freq:'High', class:'11'},
+    {name:'Motion in a Plane', ch:'Ch.4', freq:'High', class:'11'},
+    {name:'Laws of Motion', ch:'Ch.5', freq:'High', class:'11'},
+    {name:'Work, Energy & Power', ch:'Ch.6', freq:'High', class:'11'},
+    {name:'System of Particles', ch:'Ch.7', freq:'Medium', class:'11'},
+    {name:'Gravitation', ch:'Ch.8', freq:'High', class:'11'},
+    {name:'Mechanical Properties of Solids', ch:'Ch.9', freq:'Medium', class:'11'},
+    {name:'Thermal Properties of Matter', ch:'Ch.11', freq:'Medium', class:'11'},
+    {name:'Thermodynamics (Physics)', ch:'Ch.12', freq:'High', class:'11'},
+    {name:'Oscillations', ch:'Ch.14', freq:'High', class:'11'},
+    {name:'Waves', ch:'Ch.15', freq:'High', class:'11'},
+    {name:'Electric Charges & Fields', ch:'Ch.1', freq:'High', class:'12'},
+    {name:'Electrostatic Potential', ch:'Ch.2', freq:'High', class:'12'},
+    {name:'Current Electricity', ch:'Ch.3', freq:'High', class:'12'},
+    {name:'Moving Charges & Magnetism', ch:'Ch.4', freq:'High', class:'12'},
+    {name:'Magnetism & Matter', ch:'Ch.5', freq:'Medium', class:'12'},
+    {name:'Electromagnetic Induction', ch:'Ch.6', freq:'High', class:'12'},
+    {name:'Alternating Current', ch:'Ch.7', freq:'High', class:'12'},
+    {name:'Electromagnetic Waves', ch:'Ch.8', freq:'Medium', class:'12'},
+    {name:'Ray Optics', ch:'Ch.9', freq:'High', class:'12'},
+    {name:'Wave Optics', ch:'Ch.10', freq:'High', class:'12'},
+    {name:'Dual Nature of Matter', ch:'Ch.11', freq:'High', class:'12'},
+    {name:'Atoms', ch:'Ch.12', freq:'High', class:'12'},
+    {name:'Nuclei', ch:'Ch.13', freq:'High', class:'12'},
+    {name:'Semiconductor Electronics', ch:'Ch.14', freq:'High', class:'12'},
+  ]
+};
+
+const TEACH_DATA = {
+  'Cell: Unit of Life': {
+    text: `The cell is the fundamental, structural and functional unit of life. Every living organism is made up of cells — from single-celled bacteria to multicellular humans.\n\n<b>Cell Theory (NCERT Key Points):</b>\n• All living organisms are composed of cells\n• Cell is the basic unit of structure and function\n• New cells arise from pre-existing cells\n\n<b>Prokaryotic vs Eukaryotic:</b>\n• Prokaryotic: No membrane-bound nucleus (Bacteria, Archaea). 1-10 μm in size\n• Eukaryotic: Membrane-bound nucleus (Plants, Animals, Fungi). 10-100 μm\n\n<b>Cell Organelles (Must Know for NEET):</b>\n• Mitochondria: Powerhouse, site of ATP synthesis (Krebs cycle + ETC)\n• Chloroplast: Site of photosynthesis — has thylakoids (light rxns) + stroma (dark rxns)\n• Ribosome: Site of protein synthesis — 70S in prokaryotes, 80S in eukaryotes\n• Golgi: Modification + packaging + dispatch\n• ER: Smooth (lipid) + Rough (protein)\n• Lysosome: Suicide bag — digestive enzymes`,
+    ncert_line: 'Cell is the structural and functional unit of all living organisms, and it is the smallest unit of life that can replicate independently — NCERT Class 11, Ch.8',
+    revision: 'Cell = Basic unit. Prokaryote = no nucleus. 70S = prokaryote ribosome. Mitochondria = ATP. Chloroplast = photosynthesis. Golgi = dispatch. Lysosome = suicide bag.',
+    expected_q: 'Q: 70S ribosomes are found in — Answer: Prokaryotes + Mitochondria + Chloroplasts (semi-autonomous organelles)',
+    formulas: ['Size of prokaryote: 1-10 μm', 'Size of eukaryote: 10-100 μm', 'Ribosome: 70S (prokaryote) = 50S + 30S', 'Ribosome: 80S (eukaryote) = 60S + 40S'],
+  },
+  'Molecular Basis of Inheritance': {
+    text: `DNA is the hereditary material in most organisms. This chapter is EXTREMELY HIGH YIELD in NEET — typically 5-7 questions per year.\n\n<b>DNA Structure (Watson & Crick, 1953):</b>\n• Double helix — two antiparallel strands\n• Nitrogenous bases: Purines (Adenine, Guanine) + Pyrimidines (Cytosine, Thymine)\n• A=T (2 H-bonds), G≡C (3 H-bonds)\n• Chargaff's rule: A=T, G=C\n\n<b>DNA Replication (Semi-conservative):</b>\n• Proved by Meselson-Stahl experiment (1958)\n• Helicase: Unwinds helix\n• Primase: Makes RNA primer\n• DNA Pol III: Main replication enzyme (E. coli)\n• DNA Pol I: Removes primer\n• DNA Ligase: Joins Okazaki fragments\n• Leading strand: Continuous (3'→5' template)\n• Lagging strand: Discontinuous (Okazaki fragments)\n\n<b>Transcription (DNA → RNA):</b>\n• RNA Polymerase — doesn't need primer\n• Template strand = Antisense = 3'→5'\n• Coding strand = Sense = 5'→3'\n\n<b>Translation (mRNA → Protein):</b>\n• Starts at AUG (Met)\n• Stops at UAA, UAG, UGA`,
+    ncert_line: 'DNA replication is semi-conservative — each new DNA molecule consists of one original (parental) strand and one newly synthesized strand. Proved by Meselson and Stahl. — NCERT Class 12, Ch.6',
+    revision: 'DNA = double helix. A=T (2H), G≡C (3H). Replication = semi-conservative (Meselson-Stahl). Helicase → Primase → Pol III. AUG=Start. UAA/UAG/UGA=Stop.',
+    expected_q: 'Q: Which enzyme joins Okazaki fragments? Answer: DNA Ligase (NOT Pol I which only removes primer)',
+    formulas: ['Chargaff: A=T, G=C', 'A+G = T+C (Purine = Pyrimidine)', 'A+T/G+C ratio varies per species', 'Codon = 3 bases on mRNA', 'Anticodon = on tRNA'],
+  },
+  'Current Electricity': {
+    text: `Current Electricity is one of the highest-scoring chapters in NEET Physics. Focus on formulas, Kirchhoff's laws, and Wheatstone bridge.\n\n<b>Key Concepts:</b>\n• Electric Current: I = Q/t (Ampere = Coulomb/second)\n• Ohm's Law: V = IR (only for ohmic conductors)\n• Resistivity: ρ = RA/L (SI unit: Ω·m)\n\n<b>Combination of Resistors:</b>\n• Series: R = R₁+R₂+R₃ (current same, voltage divides)\n• Parallel: 1/R = 1/R₁+1/R₂+1/R₃ (voltage same, current divides)\n\n<b>Kirchhoff's Laws:</b>\n• KCL (Junction Rule): ΣI = 0 (charge conservation)\n• KVL (Loop Rule): ΣV = 0 (energy conservation)\n\n<b>Wheatstone Bridge:</b>\n• P/Q = R/S (balanced condition — galvanometer reads 0)\n\n<b>Cell & EMF:</b>\n• Terminal Voltage: V = E - Ir (while charging: V = E + Ir)\n• Power: P = VI = I²R = V²/R`,
+    ncert_line: 'Ohm\'s Law states that the current through a conductor is directly proportional to the voltage applied, provided temperature remains constant. — NCERT Class 12, Ch.3',
+    revision: 'I=Q/t. V=IR (Ohm). R_series = sum. 1/R_parallel = sum of reciprocals. KCL: ΣI=0. KVL: ΣV=0. Wheatstone: P/Q=R/S. V=E-Ir.',
+    expected_q: 'Q: In Wheatstone bridge, when is galvanometer deflection zero? Answer: When P/Q = R/S (balanced bridge)',
+    formulas: ['V = IR', 'R_series = R₁+R₂+...', '1/R_parallel = 1/R₁+1/R₂+...', 'P = VI = I²R = V²/R', 'V = E - Ir', 'Resistivity ρ = RA/L'],
+  },
+  'Photosynthesis': {
+    text: `Photosynthesis is one of the top-scoring Biology topics. Almost every NEET paper has 2-3 questions from this chapter.\n\n<b>Overall Equation:</b>\n6CO₂ + 6H₂O + light energy → C₆H₁₂O₆ + 6O₂\n\n<b>Pigments:</b>\n• Chlorophyll a (primary): absorbs red + blue light\n• Chlorophyll b, carotenoids, xanthophylls: accessory pigments\n• Phycocyanin: in blue-green algae\n• Emerson's Enhancement Effect: red + far-red light > sum individually\n\n<b>Light Reactions (in Thylakoid):</b>\n• PS II: P680 — water splitting (photolysis), O₂ released\n• PS I: P700 — NADPH formation\n• Z scheme: PS II → ETC → PS I → NADP+ reduced\n• ATP synthesis: Chemiosmosis (Mitchell's hypothesis)\n• 2H₂O → 4H⁺ + 4e⁻ + O₂\n\n<b>Dark Reactions / Calvin Cycle (in Stroma):</b>\n• CO₂ fixation by RuBisCO enzyme\n• 6CO₂ + 6 RuBP → 12 3-PGA (C3 pathway)\n• Per glucose: 18 ATP + 12 NADPH consumed\n\n<b>C4 Plants (Hatch & Slack pathway):</b>\n• First stable product: Oxaloacetate (OAA) — C4 compound\n• Kranz anatomy, two types of chloroplasts\n• Examples: Maize, sugarcane, sorghum`,
+    ncert_line: 'The primary acceptor of CO₂ in C3 plants is RuBP, and the enzyme responsible for this fixation is RuBisCO (Ribulose-1,5-bisphosphate carboxylase-oxygenase). — NCERT Class 11, Ch.13',
+    revision: '6CO₂+6H₂O→glucose+6O₂. PS II=P680=O₂ release. PS I=P700=NADPH. Calvin cycle: CO₂+RuBP→3-PGA. C4 first product=OAA. C3 first=3-PGA.',
+    expected_q: 'Q: First stable product in C3 plants is? Answer: 3-PGA (3-phosphoglycerate, a 3-carbon compound)',
+    formulas: ['For 1 glucose: 18 ATP + 12 NADPH in Calvin cycle', 'O₂ comes from H₂O (Van Niel)', 'Compensation point: Photosynthesis = Respiration', 'CO₂ fixation: CO₂ + RuBP → 2×3-PGA (RuBisCO)'],
+  },
+  'Chemical Bonding': {
+    text: `Chemical Bonding is a highly important chapter in NEET Chemistry — expect 3-4 questions every year, especially on hybridization, VSEPR, and molecular shapes.\n\n<b>Types of Bonds:</b>\n• Ionic: Transfer of electrons (metal + non-metal)\n• Covalent: Sharing of electrons\n• Coordinate/Dative: Both electrons from one atom\n\n<b>VSEPR Theory:</b>\n• Predict shape based on electron pairs\n• Lone pair-lone pair > lone pair-bond pair > bond pair-bond pair repulsion\n• BP = 2 → linear | 3 → trigonal planar | 4 → tetrahedral | 5 → trigonal bipyramidal | 6 → octahedral\n\n<b>Hybridization (MUST KNOW):</b>\n• sp: linear (BeCl₂, CO₂, C₂H₂)\n• sp²: trigonal planar (BF₃, SO₃, graphite)\n• sp³: tetrahedral (CH₄, NH₃, H₂O)\n• sp³d: trigonal bipyramidal (PCl₅)\n• sp³d²: octahedral (SF₆, XeF₄ → square planar)\n\n<b>Key Molecules and Shapes:</b>\n• H₂O: bent (2 LP, 2 BP → sp³)\n• NH₃: pyramidal (1 LP, 3 BP → sp³)\n• BF₃: trigonal planar (sp²)\n• XeF₂: linear (3 LP)\n• XeF₄: square planar (2 LP)\n• SF₆: octahedral (0 LP)\n\n<b>Bond Properties:</b>\n• Bond order ↑ → Bond length ↓, Bond energy ↑\n• Multiple bonds: σ first, then π`,
+    ncert_line: 'VSEPR theory predicts molecular shapes based on minimizing electron pair repulsion. Lone pairs exert greater repulsion than bond pairs, distorting ideal geometries. — NCERT Class 11, Ch.4',
+    revision: 'sp=linear. sp²=planar. sp³=tetrahedral. sp³d=trig-bipyramid. sp³d²=octahedral. XeF₄=square planar(2LP). H₂O=bent(sp³). NH₃=pyramidal(sp³).',
+    expected_q: 'Q: Which of the following has sp² hybridization? — BF₃, BeCl₂, CO₂, or CCl₄? Answer: BF₃ (3 bond pairs, 0 LP → sp², trigonal planar)',
+    formulas: ['Hybridization = ½(V + M - C + A)', 'Bond order = (bonding e⁻ - antibonding e⁻)/2', 'Dipole μ = q × d (Debye)', 'Electronegativity: F > O > N = Cl > Br'],
+  },
+};
+
+// ===== LOADER =====
+function runLoader() {
+  const steps = [
+    {id:'ls1', pct:25},
+    {id:'ls2', pct:50},
+    {id:'ls3', pct:75},
+    {id:'ls4', pct:100},
+  ];
+  let i = 0;
+  function next() {
+    if (i > 0) document.getElementById(steps[i-1].id).classList.replace('active','done');
+    if (i >= steps.length) {
+      setTimeout(() => {
+        document.getElementById('loader').classList.add('hidden');
+        document.getElementById('app').style.display = 'block';
+        initApp();
+      }, 500);
+      return;
+    }
+    const s = steps[i];
+    document.getElementById(s.id).classList.add('active');
+    document.getElementById('loaderBar').style.width = s.pct + '%';
+    i++;
+    setTimeout(next, 700);
+  }
+  setTimeout(next, 300);
+}
+
+// ===== INIT =====
+function initApp() {
+  loadState();
+  updateHeaderStats();
+  renderOverview();
+  renderPractice();
+  updateTopicList();
+  updateProgress();
+  renderDailyPlan();
+}
+
+function updateHeaderStats() {
+  document.getElementById('streakVal').textContent = STATE.streak;
+  document.getElementById('xpVal').textContent = STATE.xp;
+  const acc = STATE.totalQ > 0 ? Math.round((STATE.correct/STATE.totalQ)*100) : '--';
+  document.getElementById('accVal').textContent = acc + (acc !== '--' ? '%' : '');
+  document.getElementById('pAcc').textContent = acc + (acc !== '--' ? '%' : '--');
+  document.getElementById('pCorrect').textContent = STATE.correct;
+  document.getElementById('pWrong').textContent = STATE.wrong;
+  const score = STATE.correct * 4 - STATE.wrong;
+  document.getElementById('pScore').textContent = score;
+}
+
+// ===== TAB NAVIGATION =====
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'progress') updateProgress();
+}
+
+// ===== OVERVIEW =====
+function renderOverview() {
+  const bioChapters = [
+    {n:'Molecular Basis of Inheritance', pyq:'8-10 Qs/yr', w:95},
+    {n:'Human Reproduction & Health', pyq:'6-8 Qs/yr', w:85},
+    {n:'Genetics & Mendelism', pyq:'5-7 Qs/yr', w:80},
+    {n:'Plant & Animal Kingdom', pyq:'5-7 Qs/yr', w:78},
+    {n:'Biotechnology', pyq:'4-6 Qs/yr', w:72},
+    {n:'Photosynthesis', pyq:'3-5 Qs/yr', w:68},
+  ];
+  const pcChapters = [
+    {n:'Chemical Bonding (Chem)', pyq:'3-4 Qs/yr', w:90},
+    {n:'Electrochemistry (Chem)', pyq:'3-4 Qs/yr', w:85},
+    {n:'Organic Chemistry (Chem)', pyq:'8-10 Qs/yr', w:88},
+    {n:'Current Electricity (Phy)', pyq:'3-4 Qs/yr', w:82},
+    {n:'Optics (Phy)', pyq:'3-5 Qs/yr', w:80},
+    {n:'Modern Physics (Phy)', pyq:'4-5 Qs/yr', w:78},
+  ];
+  document.getElementById('bio-chapters').innerHTML = bioChapters.map(c => `
+    <div class="chapter-row">
+      <div class="ch-name">${c.n}</div>
+      <div class="ch-pyq">${c.pyq}</div>
+      <div class="ch-bars"><div class="prog-wrap"><div class="prog-fill prog-accent" style="width:${c.w}%"></div></div></div>
+    </div>`).join('');
+  document.getElementById('pc-chapters').innerHTML = pcChapters.map(c => `
+    <div class="chapter-row">
+      <div class="ch-name">${c.n}</div>
+      <div class="ch-pyq">${c.pyq}</div>
+      <div class="ch-bars"><div class="prog-wrap"><div class="prog-fill prog-gold" style="width:${c.w}%"></div></div></div>
+    </div>`).join('');
+
+  const tips = [
+    {ico:'📖', t:'AIR 1 students read NCERT <b style="color:var(--text)">minimum 5 times</b>. First 2 reads: understanding. Next 2: memorize highlighted lines. 5th read: active recall testing.'},
+    {ico:'📊', t:'PYQ Solving Pattern: First solve 5-year PYQs per chapter. Note recurring patterns. NEET repeats concepts, not always exact questions.'},
+    {ico:'⚡', t:'Question Selection: In exam, <b style="color:var(--text)">skip</b> if not sure after 45 seconds. Return later. Never guess unless you\'ve eliminated 2 options.'},
+    {ico:'🎯', t:'Biology Focus: Every NCERT diagram, table, and bold line is a potential question. Pay attention to <b style="color:var(--text)">exceptions</b> (e.g., which plant doesn\'t have vascular tissue?).'},
+    {ico:'⚗️', t:'Chemistry Strategy: Inorganic = direct NCERT. Physical = practice numericals daily. Organic = mechanisms + name reactions. Master p-Block and Coordination for guaranteed marks.'},
+  ];
+  document.getElementById('topper-tips').innerHTML = tips.map(t =>
+    `<div class="topper-tip"><span class="tip-ico">${t.ico}</span><div>${t.t}</div></div>`).join('');
+}
+
+// ===== PRACTICE =====
+let currentQIndex = 0;
+let filteredQs = [...QUESTIONS];
+let questionAnswered = false;
+let qTimerInt = null;
+let qSeconds = 0;
+
+function filterQuestions() {
+  const subj = document.getElementById('f-subject').value;
+  const diff = document.getElementById('f-difficulty').value;
+  filteredQs = QUESTIONS.filter(q =>
+    (subj === 'all' || q.subject === subj) &&
+    (diff === 'all' || q.difficulty === diff)
+  );
+  currentQIndex = 0;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  if (!filteredQs.length) {
+    document.getElementById('practice-area').innerHTML = '<div style="text-align:center;padding:2rem;color:var(--text3)">No questions match the filter. Try "AI Question" to generate one!</div>';
+    return;
+  }
+  const q = filteredQs[currentQIndex % filteredQs.length];
+  questionAnswered = false;
+  startQTimer();
+  const diffBadge = {easy:'badge-easy',medium:'badge-med',hard:'badge-hard',ranker:'badge-ranker'};
+  document.getElementById('practice-area').innerHTML = `
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="q-num">Q${currentQIndex+1} / ${filteredQs.length}</span>
+        <span class="badge ${diffBadge[q.difficulty]||'badge-med'}">${q.difficulty}</span>
+        ${q.pyq ? `<span class="badge badge-low">PYQ ${q.pyq}</span>` : ''}
+        <span class="badge badge-low">${q.subject}</span>
+        <span style="margin-left:auto;font-size:.78rem;color:var(--text3)">${q.chapter}</span>
+        <span class="q-timer" id="q-timer">00:00</span>
+      </div>
+      <div class="q-text">${q.text}</div>
+      <div class="options">
+        ${q.options.map((o,i) => `
+          <div class="opt" id="opt-${i}" onclick="selectAnswer(${q.id}, ${i})">
+            <div class="opt-label">${String.fromCharCode(65+i)}</div>
+            <div>${o}</div>
+          </div>`).join('')}
+      </div>
+      <div class="explanation-box" id="explanation-box">
+        <div class="exp-section">
+          <div class="exp-label">📘 NCERT Explanation</div>
+          <div class="exp-text">${q.explanation}</div>
+          <div style="margin-top:.4rem;font-size:.78rem;color:var(--text3);font-style:italic">${q.ncert}</div>
+        </div>
+        <div class="trick-box">⚡ Shortcut Trick: ${q.trick}</div>
+        <div class="trap-box">⚠️ Common Trap: ${q.trap}</div>
+      </div>
+      <div class="q-actions">
+        <button class="btn btn-secondary btn-sm" onclick="nextQuestion()">Next Question →</button>
+        <button class="btn btn-secondary btn-sm" onclick="loadAIQuestion()">⚡ Generate AI Question</button>
+      </div>
+    </div>`;
+}
+
+function startQTimer() {
+  clearInterval(qTimerInt);
+  qSeconds = 0;
+  qTimerInt = setInterval(() => {
+    qSeconds++;
+    const el = document.getElementById('q-timer');
+    if (!el) { clearInterval(qTimerInt); return; }
+    const m = Math.floor(qSeconds/60).toString().padStart(2,'0');
+    const s = (qSeconds%60).toString().padStart(2,'0');
+    el.textContent = `${m}:${s}`;
+    if (qSeconds > 90) el.classList.add('warn');
+  }, 1000);
+}
+
+function selectAnswer(qId, optIdx) {
+  if (questionAnswered) return;
+  questionAnswered = true;
+  clearInterval(qTimerInt);
+  const q = QUESTIONS.find(x => x.id === qId) || filteredQs.find(x => x.id === qId);
+  if (!q) return;
+  STATE.totalQ++;
+  const correct = optIdx === q.correct;
+  if (correct) {
+    STATE.correct++;
+    STATE.xp += (qSeconds < 30 ? 15 : qSeconds < 60 ? 10 : 5);
+    showToast('✅ Correct! +' + (qSeconds < 30 ? 15 : 10) + ' XP');
+    document.getElementById('opt-'+optIdx).classList.add('correct');
+  } else {
+    STATE.wrong++;
+    document.getElementById('opt-'+optIdx).classList.add('wrong');
+    document.getElementById('opt-'+q.correct).classList.add('correct');
+    const type = qSeconds > 90 ? 'Time pressure' : 'Concept mistake';
+    STATE.mistakes.push({type, qText: q.text.substring(0,60)+'...', subject: q.subject});
+    if (STATE.mistakes.length > 20) STATE.mistakes = STATE.mistakes.slice(-20);
+    showToast('❌ Wrong. Review NCERT ' + q.ncert.split(',')[0]);
+  }
+  document.getElementById('explanation-box').classList.add('show');
+  document.querySelectorAll('.opt').forEach(o => o.classList.add('disabled'));
+  updateHeaderStats();
+  saveState();
+  if (!STATE.topicPerf[q.chapter]) STATE.topicPerf[q.chapter] = {correct:0, total:0};
+  STATE.topicPerf[q.chapter].total++;
+  if (correct) STATE.topicPerf[q.chapter].correct++;
+}
+
+function nextQuestion() {
+  clearInterval(qTimerInt);
+  currentQIndex = (currentQIndex + 1) % Math.max(filteredQs.length, 1);
+  renderQuestion();
+}
+
+function resetPractice() {
+  STATE.correct = 0; STATE.wrong = 0; STATE.totalQ = 0; STATE.xp = 0;
+  updateHeaderStats(); saveState();
+  showToast('Practice stats reset');
+}
+
+async function loadAIQuestion() {
+  const subj = document.getElementById('f-subject').value === 'all' ? 'any subject' : document.getElementById('f-subject').value;
+  const diff = document.getElementById('f-difficulty').value === 'all' ? 'medium' : document.getElementById('f-difficulty').value;
+  document.getElementById('practice-area').innerHTML = `
+    <div class="q-card" style="text-align:center;padding:2rem">
+      <div class="spinner" style="margin:0 auto 1rem"></div>
+      <div style="color:var(--text2)">Generating NEET-style ${diff} ${subj} question...</div>
+    </div>`;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        system:`You are a NEET expert. Generate a single NEET UG question. Return ONLY valid JSON: {"text":"question","options":["A","B","C","D"],"correct":0,"explanation":"NCERT-based explanation","trick":"shortcut","trap":"common mistake","ncert":"NCERT class/chapter"}`,
+        messages:[{role:'user',content:`Generate a ${diff} NEET question on ${subj}, NCERT-based, 4 options, with correct index (0-3), explanation, shortcut trick, and common trap warning.`}]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '';
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
+    if (!jsonMatch) throw new Error('No JSON');
+    const q = JSON.parse(jsonMatch[0]);
+    q.id = Date.now(); q.subject = subj; q.difficulty = diff; q.chapter = 'AI Generated';
+    filteredQs = [q]; currentQIndex = 0;
+    renderQuestion();
+  } catch(e) {
+    document.getElementById('practice-area').innerHTML = `<div class="q-card" style="text-align:center;padding:2rem;color:var(--text3)">Could not generate question. Check connection or try again.</div>`;
+  }
+}
+
+// ===== TEACH ME =====
+function updateTopicList() {
+  const subj = document.getElementById('teach-subject').value;
+  const topics = TOPICS[subj] || [];
+  document.getElementById('topic-list').innerHTML = topics.map((t,i) =>
+    `<div class="topic-item" onclick="loadTopic('${t.name}','${subj}',this)">
+      <div>${t.name}</div>
+      <div class="t-sub">${t.ch} · Class ${t.class} · <span class="badge ${t.freq==='High'?'badge-high':t.freq==='Medium'?'badge-med':'badge-low'}" style="font-size:.65rem;padding:.1rem .4rem">${t.freq}</span></div>
+    </div>`).join('');
+}
+
+async function loadTopic(name, subj, el) {
+  document.querySelectorAll('.topic-item').forEach(x => x.classList.remove('active'));
+  el.classList.add('active');
+  const tc = document.getElementById('teach-content');
+  if (TEACH_DATA[name]) {
+    const d = TEACH_DATA[name];
+    tc.innerHTML = `
+      <div style="font-family:'Cinzel',serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:1rem">${name}</div>
+      <div style="font-size:.88rem;color:var(--text2);line-height:1.8;white-space:pre-line">${d.text}</div>
+      <div class="ncert-line"><div class="ncert-line-label">⚡ NCERT LINE TO REMEMBER</div><div class="ncert-line-text">"${d.ncert_line}"</div></div>
+      <div class="revision-box"><div class="revision-box-label">🔄 REVISION IN 30 SECONDS</div><div style="font-size:.85rem;color:var(--text2)">${d.revision}</div></div>
+      <div class="expected-q"><div class="expected-q-label">🎯 MOST EXPECTED QUESTION</div><div style="font-size:.85rem;color:var(--text2)">${d.expected_q}</div></div>
+      <div style="margin-top:1rem"><div style="font-size:.75rem;color:var(--text3);text-transform:uppercase;letter-spacing:.1em;margin-bottom:.5rem">Key Formulas & Facts</div>
+      <div>${(d.formulas||[]).map(f=>`<span class="formula-chip">${f}</span>`).join('')}</div></div>`;
+    return;
+  }
+  tc.innerHTML = `<div style="text-align:center;padding:1rem"><div class="spinner" style="margin:0 auto 1rem"></div><div style="color:var(--text2)">AI Coach is preparing your ${name} masterclass...</div></div>`;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1200,
+        system:'You are an expert NEET teacher. Explain NCERT topics in simple to advanced progression. Focus on exam-relevant content. Use clear structure with emojis and bold text (use HTML <b> tags). Always reference NCERT chapter. Keep it focused and exam-oriented.',
+        messages:[{role:'user',content:`Teach me "${name}" from ${subj} NCERT for NEET. Include: key concepts, important NCERT lines, formulas, a 30-second revision summary, most expected NEET question from this topic, and common mistakes. Format with HTML bold and line breaks.`}]
+      })
+    });
+    const data = await resp.json();
+    const content = data.content?.[0]?.text || 'Could not load content.';
+    tc.innerHTML = `
+      <div style="font-family:'Cinzel',serif;font-size:1.1rem;font-weight:700;color:var(--accent);margin-bottom:1rem">${name}</div>
+      <div style="font-size:.88rem;color:var(--text2);line-height:1.8">${content}</div>`;
+  } catch(e) {
+    tc.innerHTML = `<div style="padding:2rem;text-align:center;color:var(--text3)">Could not load topic. Check your connection.</div>`;
+  }
+}
+
+// ===== DOUBT CHAT =====
+async function sendDoubt() {
+  const input = document.getElementById('doubt-input');
+  const msg = input.value.trim();
+  if (!msg) return;
+  input.value = '';
+  addChatMsg('user', msg);
+  STATE.chatHistory.push({role:'user', content: msg});
+  const sendBtn = document.getElementById('send-btn');
+  sendBtn.disabled = true;
+  sendBtn.innerHTML = '<span class="spinner"></span>';
+  addThinkingMsg();
+  try {
+    const messages = STATE.chatHistory.slice(-10).map(m => ({role:m.role, content:m.content}));
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:1000,
+        system:`You are PrepMind AI, an expert NEET coach like ALLEN/Aakash top faculty. You're mentoring Pooja, a NEET aspirant targeting AIR 1. Your style:
+- Explain concepts simply but with depth
+- Always connect to NCERT (mention class and chapter)
+- Give memory tricks and shortcuts
+- Point out common exam traps
+- Use emojis to make content engaging
+- Give exam-focused logic, not textbook theory
+- If asked about a formula, derive it simply and give the trick to remember
+- Be encouraging and motivating
+Format responses clearly with line breaks.`,
+        messages
+      })
+    });
+    const data = await resp.json();
+    const reply = data.content?.[0]?.text || 'I had trouble understanding that. Please rephrase your doubt.';
+    removeThinkingMsg();
+    STATE.chatHistory.push({role:'assistant', content: reply});
+    addChatMsg('ai', reply);
+    STATE.xp += 5; updateHeaderStats(); saveState();
+  } catch(e) {
+    removeThinkingMsg();
+    addChatMsg('ai', '❌ Connection issue. Please check your internet and try again. Your question was: "' + msg + '"');
+  }
+  sendBtn.disabled = false; sendBtn.innerHTML = 'Send ➤';
+}
+
+function addChatMsg(role, text) {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg ' + role;
+  d.innerHTML = `<div class="msg-avatar">${role === 'ai' ? '🎓' : '👩'}</div>
+    <div class="msg-bubble">${text.replace(/\n/g,'<br>')}</div>`;
+  msgs.appendChild(d);
+  msgs.scrollTop = msgs.scrollHeight;
+}
+
+function addThinkingMsg() {
+  const msgs = document.getElementById('chat-messages');
+  const d = document.createElement('div');
+  d.className = 'msg ai'; d.id = 'thinking-msg';
+  d.innerHTML = `<div class="msg-avatar">🎓</div>
+    <div class="msg-bubble" style="color:var(--text3)"><span class="thinking-dots"><span>●</span><span>●</span><span>●</span></span> Thinking...</div>`;
+  msgs.appendChild(d); msgs.scrollTop = msgs.scrollHeight;
+}
+
+function removeThinkingMsg() {
+  const el = document.getElementById('thinking-msg');
+  if (el) el.remove();
+}
+
+function handleChatKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendDoubt(); }
+}
+
+function quickAsk(q) {
+  document.getElementById('doubt-input').value = q;
+  sendDoubt();
+}
+
+// ===== PROGRESS =====
+function updateProgress() {
+  document.getElementById('total-questions-done').textContent = STATE.totalQ;
+  const acc = STATE.totalQ > 0 ? Math.round((STATE.correct/STATE.totalQ)*100) : '--';
+  document.getElementById('total-accuracy').textContent = acc + (acc!=='--'?'%':'');
+  document.getElementById('total-xp-disp').textContent = STATE.xp;
+  document.getElementById('total-streak-disp').textContent = STATE.streak;
+
+  // Rank prediction
+  const score = STATE.correct * 4 - STATE.wrong;
+  const maxScore = 720;
+  if (STATE.totalQ > 5) {
+    const pct = Math.min(score / maxScore, 1);
+    let rank, rankMsg;
+    if (score >= 680) { rank = 'AIR 1–10'; rankMsg = '🔥 You are in the TOP territory! Maintain this performance.'; }
+    else if (score >= 650) { rank = 'AIR ~50'; rankMsg = '⭐ Excellent! Strengthen weak Biology topics.'; }
+    else if (score >= 600) { rank = 'AIR ~500'; rankMsg = '📈 Very good! Focus on organic chemistry & genetics.'; }
+    else if (score >= 550) { rank = 'AIR ~2000'; rankMsg = '💪 Good progress! Need more NCERT revision.'; }
+    else if (score >= 450) { rank = 'AIR ~10000'; rankMsg = '📚 Practice more PYQs. Focus on Biology basics.'; }
+    else { rank = 'AIR ~50000+'; rankMsg = '🔄 Start from NCERT fundamentals. Build chapter by chapter.'; }
+    document.getElementById('predicted-rank').textContent = rank;
+    document.getElementById('rank-message').textContent = rankMsg;
+    document.getElementById('score-estimate').textContent = Math.max(0,score) + ' / 720';
+    document.getElementById('rank-bar').style.width = Math.max(0,Math.min(pct*100,100)) + '%';
+  }
+
+  // Subject performance
+  const subjData = {biology:{c:0,t:0}, chemistry:{c:0,t:0}, physics:{c:0,t:0}};
+  Object.entries(STATE.topicPerf).forEach(([topic, data]) => {
+    const q = QUESTIONS.find(x => x.chapter === topic);
+    if (q) { const s = q.subject; subjData[s].c += data.correct; subjData[s].t += data.total; }
+  });
+  document.getElementById('subject-perf').innerHTML = Object.entries(subjData).map(([s, d]) => {
+    const pct = d.t > 0 ? Math.round((d.c/d.t)*100) : 0;
+    const icon = {biology:'🔬',chemistry:'⚗️',physics:'⚡'}[s];
+    return `<div style="margin-bottom:.8rem">
+      <div style="display:flex;justify-content:space-between;margin-bottom:.3rem">
+        <span style="font-size:.85rem;color:var(--text2)">${icon} ${s.charAt(0).toUpperCase()+s.slice(1)}</span>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.8rem;color:${pct>=70?'var(--green)':pct>=50?'var(--gold)':'var(--red)'}">${pct}%</span>
+      </div>
+      <div class="prog-wrap"><div class="prog-fill ${pct>=70?'prog-green':pct>=50?'prog-gold':'prog-accent'}" style="width:${pct}%"></div></div>
+      <div style="font-size:.72rem;color:var(--text3);margin-top:.2rem">${d.c}/${d.t} correct</div>
+    </div>`;
+  }).join('');
+
+  // Weak areas
+  const weak = Object.entries(STATE.topicPerf)
+    .filter(([,d]) => d.total > 0)
+    .map(([t,d]) => ({t, pct: Math.round((d.correct/d.total)*100)}))
+    .sort((a,b) => a.pct - b.pct).slice(0,5);
+  if (weak.length === 0) {
+    document.getElementById('weak-areas').innerHTML = '<div style="color:var(--text3);font-size:.85rem;padding:.5rem 0">Solve more questions to identify weak areas.</div>';
+  } else {
+    document.getElementById('weak-areas').innerHTML = weak.map(w => `
+      <div class="weak-topic-row">
+        <div class="weak-name">${w.t}</div>
+        <div class="weak-pct" style="color:${w.pct>=70?'var(--green)':w.pct>=50?'var(--gold)':'var(--red)'}">${w.pct}%</div>
+        <div style="width:80px"><div class="prog-wrap"><div class="prog-fill ${w.pct>=70?'prog-green':w.pct>=50?'prog-gold':'prog-accent'}" style="width:${w.pct}%"></div></div></div>
+      </div>`).join('');
+  }
+
+  // Mistakes
+  if (STATE.mistakes.length === 0) {
+    document.getElementById('mistake-log').innerHTML = '<div style="color:var(--green);font-size:.85rem;padding:.5rem 0">✅ No mistakes logged yet. Keep practicing!</div>';
+  } else {
+    document.getElementById('mistake-log').innerHTML = STATE.mistakes.slice(-8).reverse().map(m => `
+      <div class="mistake-item">
+        <div><span class="mistake-type">${m.type}</span></div>
+        <div style="flex:1"><div style="font-size:.83rem;color:var(--text2)">${m.qText}</div>
+        <div style="font-size:.72rem;color:var(--text3)">${m.subject}</div></div>
+      </div>`).join('');
+  }
+
+  // Rank level
+  const levels = [
+    {min:0,max:200,cls:'lvl-beginner',name:'Beginner',desc:'Start with NCERT basics. Read Chapter 1 of each subject.',pct:10},
+    {min:200,max:1000,cls:'lvl-rising',name:'Rising Star',desc:'Good momentum! Focus on high-frequency chapters and PYQs.',pct:35},
+    {min:1000,max:3000,cls:'lvl-advanced',name:'Advanced',desc:'Strong performer! Work on ranker-level questions and speed.',pct:65},
+    {min:3000,max:Infinity,cls:'lvl-air',name:'AIR Mode 🏆',desc:'Top tier! Maintain accuracy and simulate full mock tests.',pct:95},
+  ];
+  const lvl = levels.find(l => STATE.xp >= l.min && STATE.xp < l.max) || levels[0];
+  document.getElementById('rank-level-badge').innerHTML = `<span class="lvl-badge ${lvl.cls}">${lvl.name}</span>`;
+  document.getElementById('rank-level-desc').textContent = lvl.desc;
+  document.getElementById('level-bar').style.width = lvl.pct + '%';
+}
+
+async function generateAIRevisionPlan() {
+  const btn = event.target;
+  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Generating...';
+  const weak = Object.entries(STATE.topicPerf).filter(([,d])=>d.total>0).map(([t,d])=>({t, pct:Math.round((d.correct/d.total)*100)})).sort((a,b)=>a.pct-b.pct).slice(0,3);
+  const weakStr = weak.map(w=>w.t).join(', ') || 'general NEET topics';
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:600,
+        system:'You are a NEET AI coach. Give a specific, actionable 7-day revision plan.',
+        messages:[{role:'user',content:`Pooja has weak areas in: ${weakStr}. Total XP: ${STATE.xp}. Accuracy: ${STATE.totalQ>0?Math.round((STATE.correct/STATE.totalQ)*100):0}%. Create a focused 7-day NCERT revision plan to boost her rank. Be specific about chapters, hours, and techniques. Keep it concise and motivating.`}]
+      })
+    });
+    const data = await resp.json();
+    document.getElementById('revision-plan-output').innerHTML = `
+      <div class="card" style="margin-top:.5rem;background:rgba(248,200,220,.04);border-color:rgba(248,200,220,.2)">
+        <div class="card-title">🤖 Your Personal 7-Day Revision Plan</div>
+        <div style="font-size:.85rem;color:var(--text2);line-height:1.7;white-space:pre-line">${data.content?.[0]?.text || 'Could not generate plan.'}</div>
+      </div>`;
+  } catch(e) {
+    document.getElementById('revision-plan-output').innerHTML = '<div style="color:var(--red);font-size:.85rem">Could not generate plan. Check connection.</div>';
+  }
+  btn.disabled = false; btn.innerHTML = '🤖 Get AI Revision Plan';
+}
+
+// ===== DAILY PLAN =====
+async function generateDailyPlan() {
+  const area = document.getElementById('daily-plan-area');
+  area.innerHTML = `<div style="text-align:center;padding:2rem"><div class="spinner" style="margin:0 auto 1rem"></div><div style="color:var(--text2)">AI is building your personalized study plan...</div></div>`;
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({
+        model:'claude-sonnet-4-20250514', max_tokens:800,
+        system:'You are a NEET study planner. Return a structured daily plan as JSON array: [{"time":"6:00 AM","task":"task name","subject":"biology/chemistry/physics/revision","duration":"1 hour","detail":"what exactly to do"}]. No extra text, just valid JSON array.',
+        messages:[{role:'user',content:`Create today's NEET study plan for Pooja. XP: ${STATE.xp}, Accuracy: ${STATE.totalQ>0?Math.round((STATE.correct/STATE.totalQ)*100):0}%. Include: morning NCERT reading, afternoon PYQ practice, evening revision, night formula review. Total 8-10 hours of study. Make it specific.`}]
+      })
+    });
+    const data = await resp.json();
+    const text = data.content?.[0]?.text || '[]';
+    const jsonMatch = text.match(/\[[\s\S]*\]/);
+    const plan = JSON.parse(jsonMatch?.[0] || '[]');
+    const colors = {biology:'var(--accent)',chemistry:'var(--gold)',physics:'var(--blue)',revision:'var(--green)'};
+    area.innerHTML = `
+      <div class="card">
+        <div class="card-title">📅 Today's Personalized Plan — ${new Date().toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'})}</div>
+        ${plan.map((p,i) => `
+          <div class="plan-item">
+            <div class="plan-time">${p.time||''}</div>
+            <div style="flex:1">
+              <div class="plan-label"><b style="color:${colors[p.subject]||'var(--text)'}">${p.task||''}</b></div>
+              <div class="plan-tag">${p.detail||''} · ${p.duration||''}</div>
+            </div>
+            <div class="plan-check" id="pc-${i}" onclick="togglePlanCheck(${i})"></div>
+          </div>`).join('')}
+        <div style="margin-top:1rem;padding:.8rem;background:rgba(74,222,128,.05);border:1px solid rgba(74,222,128,.2);border-radius:8px;font-size:.82rem;color:var(--green)">
+          ✅ Complete all tasks to earn bonus 50 XP! Consistency builds AIR rankers.
+        </div>
+      </div>`;
+  } catch(e) {
+    area.innerHTML = `<div style="text-align:center;padding:2rem;color:var(--text3)">Could not generate plan. Check internet connection and try again.</div>`;
+  }
+}
+
+function togglePlanCheck(i) {
+  const el = document.getElementById('pc-'+i);
+  el.classList.toggle('done');
+  if (el.classList.contains('done')) { el.innerHTML = '✓'; STATE.xp += 10; updateHeaderStats(); saveState(); showToast('+10 XP! Task completed 🎯'); }
+  else { el.innerHTML = ''; }
+}
+
+// ===== EXAM MODE =====
+const EXAM_QUESTIONS = [...QUESTIONS, ...QUESTIONS, ...QUESTIONS].slice(0,30).map((q,i) => ({...q, examId:i}));
+
+function startExamMode() {
+  STATE.examAnswers = {};
+  STATE.examMarked = new Set();
+  STATE.currentExamQ = 0;
+  STATE.examSeconds = 10800;
+  document.getElementById('exam-overlay').classList.add('active');
+  renderExamQuestion();
+  renderQDotGrid();
+  startExamTimer();
+}
+
+function closeExam() {
+  clearInterval(STATE.examTimerInt);
+  document.getElementById('exam-overlay').classList.remove('active');
+}
+
+function startExamTimer() {
+  clearInterval(STATE.examTimerInt);
+  STATE.examTimerInt = setInterval(() => {
+    STATE.examSeconds--;
+    if (STATE.examSeconds <= 0) { submitExam(); return; }
+    const h = Math.floor(STATE.examSeconds/3600);
+    const m = Math.floor((STATE.examSeconds%3600)/60);
+    const s = STATE.examSeconds%60;
+    const el = document.getElementById('exam-timer');
+    el.textContent = `${h}:${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
+    if (STATE.examSeconds < 600) el.classList.add('warn');
+  }, 1000);
+}
+
+function renderExamQuestion() {
+  const q = EXAM_QUESTIONS[STATE.currentExamQ];
+  if (!q) return;
+  const ans = STATE.examAnswers[STATE.currentExamQ];
+  document.getElementById('exam-main').innerHTML = `
+    <div style="font-size:.78rem;color:var(--text3);margin-bottom:.8rem">Question ${STATE.currentExamQ+1} of ${EXAM_QUESTIONS.length} · ${q.subject} · ${q.chapter}</div>
+    <div style="font-size:.95rem;line-height:1.7;margin-bottom:1.2rem;color:var(--text)">${q.text}</div>
+    <div class="options">
+      ${q.options.map((o,i) => `
+        <div class="opt ${ans===i?'selected-ans':''}" onclick="selectExamAnswer(${i})" style="${ans===i?'border-color:var(--accent);background:rgba(248,200,220,.08)':''}">
+          <div class="opt-label">${String.fromCharCode(65+i)}</div>
+          <div>${o}</div>
+        </div>`).join('')}
+    </div>`;
+  document.getElementById('exam-ans-count').textContent = Object.keys(STATE.examAnswers).length;
+  document.getElementById('exam-mark-count').textContent = STATE.examMarked.size;
+  // highlight current dot
+  document.querySelectorAll('.q-dot').forEach((d,i) => {
+    d.classList.toggle('current', i === STATE.currentExamQ);
+  });
+}
+
+function renderQDotGrid() {
+  document.getElementById('q-dot-grid').innerHTML = EXAM_QUESTIONS.map((q,i) =>
+    `<div class="q-dot ${STATE.examAnswers[i]!==undefined?'answered':''} ${STATE.examMarked.has(i)?'marked':''} ${i===STATE.currentExamQ?'current':''}" onclick="goToExamQ(${i})">${i+1}</div>`
+  ).join('');
+}
+
+function selectExamAnswer(optIdx) {
+  STATE.examAnswers[STATE.currentExamQ] = optIdx;
+  renderExamQuestion();
+  renderQDotGrid();
+}
+
+function examNav(dir) {
+  STATE.currentExamQ = Math.max(0, Math.min(EXAM_QUESTIONS.length-1, STATE.currentExamQ+dir));
+  renderExamQuestion();
+}
+
+function goToExamQ(i) { STATE.currentExamQ = i; renderExamQuestion(); }
+
+function markForReview() {
+  if (STATE.examMarked.has(STATE.currentExamQ)) STATE.examMarked.delete(STATE.currentExamQ);
+  else STATE.examMarked.add(STATE.currentExamQ);
+  renderQDotGrid(); renderExamQuestion();
+}
+
+function clearExamAnswer() {
+  delete STATE.examAnswers[STATE.currentExamQ];
+  renderExamQuestion(); renderQDotGrid();
+}
+
+function submitExam() {
+  clearInterval(STATE.examTimerInt);
+  let correct=0, wrong=0;
+  EXAM_QUESTIONS.forEach((q,i) => {
+    if (STATE.examAnswers[i] !== undefined) {
+      if (STATE.examAnswers[i] === q.correct) correct++;
+      else wrong++;
+    }
+  });
+  const score = correct*4 - wrong;
+  const total = EXAM_QUESTIONS.length;
+  document.getElementById('exam-main').innerHTML = `
+    <div style="text-align:center;padding:2rem">
+      <div style="font-family:'Cinzel',serif;font-size:2rem;font-weight:900;background:linear-gradient(135deg,var(--accent),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:.5rem">Exam Completed! 🎯</div>
+      <div style="font-size:3rem;font-weight:900;color:var(--gold);font-family:'JetBrains Mono',monospace">${score}</div>
+      <div style="color:var(--text3);margin-bottom:1.5rem">out of ${total*4} marks</div>
+      <div class="grid3" style="max-width:400px;margin:0 auto 1.5rem">
+        <div class="prog-stat-card"><div class="prog-stat-val" style="font-size:1.5rem">${correct}</div><div class="prog-stat-lab">Correct</div></div>
+        <div class="prog-stat-card"><div class="prog-stat-val" style="font-size:1.5rem;background:linear-gradient(135deg,var(--red),#f87171);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${wrong}</div><div class="prog-stat-lab">Wrong</div></div>
+        <div class="prog-stat-card"><div class="prog-stat-val" style="font-size:1.5rem;background:linear-gradient(135deg,var(--text3),#6b6485);-webkit-background-clip:text;-webkit-text-fill-color:transparent">${total-correct-wrong}</div><div class="prog-stat-lab">Unattempted</div></div>
+      </div>
+      <div style="font-size:.9rem;color:var(--text2);margin-bottom:1.5rem">${score>=600?'🔥 Excellent! You\'re in the top percentile!':score>=450?'📈 Good effort! Keep practicing daily.':'📚 Need more practice. Focus on NCERT basics.'}</div>
+      <button class="btn btn-primary" onclick="closeExam()">Return to Dashboard</button>
+    </div>`;
+  STATE.xp += Math.max(0, score); STATE.correct += correct; STATE.wrong += wrong; STATE.totalQ += correct+wrong;
+  updateHeaderStats(); saveState();
+}
+
+// ===== BRAIN MODE =====
+function toggleBrainMenu() {
+  document.getElementById('brain-menu').classList.toggle('open');
+}
+
+function setBrainMode(mode) {
+  STATE.brainMode = mode;
+  const labels = {learning:'📖 Learning Mode',speed:'⚡ Speed Mode',exam:'⚔️ Exam Mode',revision:'🔄 Revision Mode'};
+  document.getElementById('mode-tag').textContent = labels[mode]||mode;
+  document.getElementById('brain-menu').classList.remove('open');
+  showToast(labels[mode] + ' activated');
+  // Adjust timer speed for speed mode
+  if (mode === 'speed') showToast('⚡ Speed Mode: 45 sec per question target!');
+}
+
+// ===== TOAST =====
+function showToast(msg, duration=2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+// Close brain menu on outside click
+document.addEventListener('click', e => {
+  if (!e.target.closest('.brain-mode-float')) {
+    document.getElementById('brain-menu').classList.remove('open');
+  }
+});
+
+// ===== RENDER DAILY PLAN STATIC (before AI) =====
+function renderDailyPlan() {
+  // Just show the prompt state — user clicks button to generate
+}
+
+// ===== INIT CHAPTERS FILTER =====
+function initChapterFilter() {
+  const all = [...new Set(QUESTIONS.map(q => q.chapter))];
+  const sel = document.getElementById('f-chapter');
+  all.forEach(c => {
+    const o = document.createElement('option');
+    o.value = c; o.textContent = c;
+    sel.appendChild(o);
+  });
+}
+
+// ===== BOOT =====
+window.addEventListener('load', () => {
+  runLoader();
+  initChapterFilter();
+});
+</script>
+</body>
+</html>
